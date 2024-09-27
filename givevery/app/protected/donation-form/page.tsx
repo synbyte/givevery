@@ -7,98 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
-
-
+import { Elements } from '@stripe/react-stripe-js';
+import CheckoutForm from "@/components/donation/CheckoutForm";
+import SuccessPage from "@/components/donation/SuccessPage";
+import StepIndicator from "@/components/donation/StepIndicator";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY||'');
-const options = {
-  mode: 'setup',
-  currency: 'usd'
-}
-const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess }:{ totalAmount: number, onBack: () => void }) => {
-  const stripe = useStripe();
-  const elements = useElements();
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const res = await fetch('/api/create-payment-intent', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ amount: totalAmount }),
-    });
-
-    const { clientSecret } = await res.json();
-
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-      },
-    });
-
-    if (result.error) {
-      console.error(result.error.message);
-    } else {
-      if (result.paymentIntent.status === 'succeeded') {
-        console.log('Payment succeeded!');
-        setPaymentSuccess(true);
-      }
-    }
-  };
-
-  return (
-    <Card className="w-full max-w-md mx-auto bg-gradient-to-tl from-green-50 to-green-100 text-black">
-      <CardHeader>
-        <StepIndicator step='payment'/>
-        <CardTitle>Enter Payment Details</CardTitle>
-        <CardDescription>Complete your donation by providing your payment information.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <Label htmlFor="card-element">Card Details</Label>
-        <div id="card-element" className="p-2 border border-dashed rounded-md">
-          <PaymentElement  />
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between mt-4">
-        <Button type="button" onClick={onBack} className="bg-gray-500 hover:bg-gray-600 focus:ring-gray-500">
-          Back
-        </Button>
-        <Button type="submit" onClick={handleSubmit} className="bg-green-500 hover:bg-green-600 focus:ring-green-500">
-          Pay ${totalAmount.toFixed(2)}
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-};
-
-const SuccessPage = ({totalAmount}) => {
-    return (
-      <Card className="w-full max-w-md mx-auto bg-gradient-to-tl from-green-50 to-green-100 text-black">
-        <CardHeader>
-            <StepIndicator step='success'/>
-            <CardTitle>Thank you!</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <p>Your donation of <p className="font-bold text-2xl">${totalAmount}</p> has been received. Thank you for your support!</p>
-        </CardContent>
-        
-        </Card>
-    );
-  };
-
-
-const StepIndicator = ({ step }: { step: "form" | "payment" | "success" }) => {
-    return (
-      <div className="flex items-center justify-end space-x-2">
-        <span className={`w-2 h-3 rounded-full ${step === "form" ? "bg-green-500" : "bg-gray-300"}`}></span>
-        <span className={`w-2 h-3 rounded-full ${step === "payment"  ? "bg-green-500" : "bg-gray-300"}`}></span>
-        <span className={`w-2 h-3 rounded-full ${step === "success" ? "bg-green-500" : "bg-gray-300"}`}></span>
-    </div>
-    );
-  };
 
 
 export default function DonationForm() {
@@ -109,8 +23,12 @@ export default function DonationForm() {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [step, setStep] = useState<"form" | "payment" | "success">("form");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-
+  const [stripeOptions, setStripeOptions] = useState(null);
   const TRANSACTION_FEE = 3.25;
+
+ 
+  
+  
 
   const handleDonationTypeChange = (type: "once" | "monthly") => {
     setDonationType(type);
@@ -137,19 +55,33 @@ export default function DonationForm() {
   useEffect(() => {
     const baseAmount = Number(customAmount) || donationAmount || 0;
     const fee = coverFees ? TRANSACTION_FEE : 0;
-    setTotalAmount(baseAmount + fee);
+    const newTotalAmount = baseAmount + fee;
+    setTotalAmount(newTotalAmount);
+
+    if (newTotalAmount > 0) {
+      setStripeOptions({
+        mode: "payment",
+        amount: newTotalAmount * 100,
+        currency: "usd",
+        
+      });
+    }
   }, [customAmount, donationAmount, coverFees]);
 
   const handleDonateClick = () => {
+    if (Number(customAmount) || donationAmount > 0) {
     setStep("payment");
-  };
+  } else {
+    alert("Please enter a valid donation amount.");
+  }
+};
 
   const handleBackClick = () => {
     setStep("form");
   };
 
   return (
-    <Elements stripe={stripePromise} options={options}>
+    
       <Card className="w-full max-w-md mx-auto bg-gradient-to-tl from-green-50 to-green-100 text-black">
         {paymentSuccess ? (
             <SuccessPage totalAmount={totalAmount} /> 
@@ -215,10 +147,12 @@ export default function DonationForm() {
               </Button>
             </CardFooter>
           </>
-        ) : (
+        ) : step === "payment" && stripeOptions && (
+          <Elements stripe={stripePromise} options={stripeOptions}>
           <CheckoutForm setPaymentSuccess={setPaymentSuccess} totalAmount={totalAmount} onBack={handleBackClick} />
+          </Elements>
         )}
       </Card>
-    </Elements>
+    
   );
 }
