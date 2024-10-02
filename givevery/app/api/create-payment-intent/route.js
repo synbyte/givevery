@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { stripe } from '@/utils/utils';
 
 
@@ -9,10 +8,11 @@ export async function POST(request) {
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount * 100, // amount in cents
-      currency: 'usd',
+      currency: 'cad',
       automatic_payment_methods: {
         enabled: true,
-      }
+      },
+      application_fee_amount: amount * 0.04,
     });
 
     console.log('payment succeeded!')

@@ -32,9 +32,21 @@ export const useStripeConnect = (connectedAccountId) => {
           publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
           fetchClientSecret,
           appearance: {
-            overlays: "dialog",
+            overlays: "modal",
+
             variables: {
-              colorPrimary: "#635BFF",
+              colorPrimary: "#00C220",
+              colorBackground: "#FFFFFF",
+              buttonPrimaryColorBackground: "#08D42A",
+              buttonPrimaryColorBorder: "#4DFF6A",
+              buttonPrimaryColorText: "#FFFFFF",
+              borderRadius: "24px",
+              colorBorder:"#000000",
+              formBorderRadius: "24px",
+              overlayBorderRadius: "24px",
+              overlayZIndex: 5,
+              spacingUnit: "8px",
+              fontFamily: "Roboto",
             },
           },
         })

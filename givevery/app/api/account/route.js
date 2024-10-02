@@ -3,21 +3,19 @@ import { NextResponse } from 'next/server';
 
 export async function POST() {
     try {
-      const account = await stripe.accounts.create({
+      /*const account = await stripe.accounts.create({
         controller: {
           stripe_dashboard: {
             type: "none",
-          },
-          fees: {
-            payer: "application"
           },
         },
         capabilities: {
           card_payments: {requested: true},
           transfers: {requested: true}
         },
-        country: "US",
-      });
+        country: "CA",
+      });*/
+      const account = await stripe.accounts.create({});
 
       return NextResponse.json({account: account.id});
     } catch (error) {

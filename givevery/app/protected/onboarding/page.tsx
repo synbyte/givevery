@@ -7,6 +7,7 @@ import {
   ConnectComponentsProvider,
 } from "@stripe/react-connect-js";
 import { Button } from "@/components/ui/button";
+import Router from "next/router";
 
 export default function Home() {
   const [accountCreatePending, setAccountCreatePending] = useState(false);
@@ -14,6 +15,7 @@ export default function Home() {
   const [error, setError] = useState(false);
   const [connectedAccountId, setConnectedAccountId] = useState();
   const stripeConnectInstance = useStripeConnect(connectedAccountId);
+  const router = Router
 
   return (
     <div className="flex flex-col items-center bg-red-100">
@@ -55,7 +57,7 @@ export default function Home() {
         {stripeConnectInstance && (
           <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
             <ConnectAccountOnboarding
-              onExit={() => setOnboardingExited(true)}
+              onExit={() => {setOnboardingExited(true); router.push('./dashboard') }}
             />
           </ConnectComponentsProvider>
         )}
