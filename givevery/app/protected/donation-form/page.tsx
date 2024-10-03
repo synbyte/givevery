@@ -11,11 +11,11 @@ import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from "@/components/donation/CheckoutForm";
 import SuccessPage from "@/components/donation/SuccessPage";
 import StepIndicator from "@/components/donation/StepIndicator";
-
+import { createClient } from "@/utils/supabase/client";
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY||'');
+import Router from "next/router";
 
-
-export default function DonationForm() {
+export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
   const [donationType, setDonationType] = useState<"once" | "monthly">("once");
   const [donationAmount, setDonationAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState<string>("");
@@ -25,10 +25,26 @@ export default function DonationForm() {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [stripeOptions, setStripeOptions] = useState(null);
   const TRANSACTION_FEE = 3.25;
-
- 
+  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null)
+  const supabase = createClient();
+  const router = Router;
+  useEffect(() => {
+    const fetchConnectedAccountId = async () => {
+      const { data, error } = await supabase
+        .from('nonprofits')
+        .select('connected_account_id')
+        .eq('id', nonprofitId)
+        .single();
   
+      if (error) {
+        console.error('Error fetching connected account ID:', error);
+      } else {
+        setConnectedAccountId(data.connected_account_id);
+      }
+    };
   
+    fetchConnectedAccountId();
+  }, [nonprofitId]);
 
   const handleDonationTypeChange = (type: "once" | "monthly") => {
     setDonationType(type);
@@ -149,7 +165,7 @@ export default function DonationForm() {
           </>
         ) : step === "payment" && stripeOptions && (
           <Elements stripe={stripePromise} options={stripeOptions}>
-          <CheckoutForm setPaymentSuccess={setPaymentSuccess} totalAmount={totalAmount} onBack={handleBackClick} />
+          <CheckoutForm nonprofitId={nonprofitId} setPaymentSuccess={setPaymentSuccess} totalAmount={totalAmount} onBack={handleBackClick} />
           </Elements>
         )}
       </Card>

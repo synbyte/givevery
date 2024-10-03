@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStripeConnect } from "@/hooks/useStripeConnect";
 import {
   ConnectAccountOnboarding,
@@ -8,6 +8,7 @@ import {
 } from "@stripe/react-connect-js";
 import { Button } from "@/components/ui/button";
 import Router from "next/router";
+import { createClient } from "@/utils/supabase/client";
 
 export default function Home() {
   const [accountCreatePending, setAccountCreatePending] = useState(false);
@@ -16,6 +17,30 @@ export default function Home() {
   const [connectedAccountId, setConnectedAccountId] = useState();
   const stripeConnectInstance = useStripeConnect(connectedAccountId);
   const router = Router
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function addConnectedAccount(account:any){
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+                    if (userError) {
+                      console.error("Error fetching user:", userError);
+                      setError(true);
+                      return;
+                    }
+
+                    const { error: updateError } = await supabase
+                      .from('nonprofits')
+                      .update({ connected_account_id: account })
+                      .eq('id', userData.user.id);
+
+                    if (updateError) {
+                      console.error("Error updating nonprofit record:", updateError);
+                      setError(true);
+                    }
+                  if(error){setError(true)}
+    }
+    addConnectedAccount(connectedAccountId);
+  },[connectedAccountId])
 
   return (
     <div className="flex flex-col items-center bg-red-100">

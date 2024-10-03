@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "../ui/card";
 import StepIndicator from "./StepIndicator";
 
-const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess }:{ totalAmount: number, onBack: () => void }) => {
+const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess, nonprofitId }:{ totalAmount: number, onBack: () => void }) => {
     const stripe = useStripe();
     const elements = useElements();
   
@@ -16,7 +16,7 @@ const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess }:{ totalAmount: 
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount: totalAmount }),
+        body: JSON.stringify({ amount: totalAmount, nonprofitId: nonprofitId }),
       });
   
       const { clientSecret } = await res.json();
@@ -51,8 +51,7 @@ const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess }:{ totalAmount: 
           </div>
           <Label htmlFor="expressPayment">Quick pay options</Label>
           <div id="expressPayment" className="p-2 border border-dashed rounded-md">
-            <ExpressCheckoutElement />
-            <PaymentElement/>
+            
           </div>
         </CardContent>
         <CardFooter className="flex justify-between mt-4">
