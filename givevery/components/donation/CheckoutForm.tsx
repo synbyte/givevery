@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "../ui/card";
 import StepIndicator from "./StepIndicator";
 
-const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess, nonprofitId }:{ totalAmount: number, onBack: () => void }) => {
+const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess, nonprofitId }:{ totalAmount: number, setPaymentSuccess: any, nonprofitId: any, onBack: () => void }) => {
     const stripe = useStripe();
     const elements = useElements();
   
@@ -47,7 +47,7 @@ const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess, nonprofitId }:{ 
         <CardContent className="space-y-5">
           <Label htmlFor="card-element">Pay with card</Label>
           <div id="card-element" className="p-2 border border-dashed rounded-md">
-            <CardElement  />
+            <form><PaymentElement  /><button>submit</button></form>
           </div>
           <Label htmlFor="expressPayment">Quick pay options</Label>
           <div id="expressPayment" className="p-2 border border-dashed rounded-md">
