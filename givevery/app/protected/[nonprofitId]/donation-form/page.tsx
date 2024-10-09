@@ -1,33 +1,37 @@
 "use client"
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from "@/components/donation/CheckoutForm";
 import SuccessPage from "@/components/donation/SuccessPage";
 import StepIndicator from "@/components/donation/StepIndicator";
 import { createClient } from "@/utils/supabase/client";
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY||'');
 import Router from "next/router";
+
+let stripePromise: Promise<Stripe | null>;
 
 export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
   const [donationType, setDonationType] = useState<"once" | "monthly">("once");
-  const [donationAmount, setDonationAmount] = useState<number | null>(null);
-  const [customAmount, setCustomAmount] = useState<string>("");
+  const [donationAmount, setDonationAmount] = useState<number | null>(100);
+  const [customAmount, setCustomAmount] = useState<number>();
   const [coverFees, setCoverFees] = useState(false);
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [step, setStep] = useState<"form" | "payment" | "success">("form");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [stripeOptions, setStripeOptions] = useState(null);
+  const [clientSecret, setClientSecret] = useState()
   const TRANSACTION_FEE = 3.25;
   const [connectedAccountId, setConnectedAccountId] = useState<string>()
   const supabase = createClient();
   const router = Router;
+  
+  // SET connectedAccountId from DB
   useEffect(() => {
     const fetchConnectedAccountId = async () => {
       const { data, error } = await supabase
@@ -48,6 +52,29 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
     
   }, [nonprofitId]);
 
+   // CALCULATE DONATION AMOUNT
+   useEffect(() => {
+    const baseAmount = Number(customAmount) || donationAmount || 0;
+    const fee = coverFees ? TRANSACTION_FEE : 0;
+    const newTotalAmount = baseAmount + fee;
+    setTotalAmount(newTotalAmount);
+  }, [customAmount, donationAmount, coverFees]);
+
+  // SET STRIPEOPTIONS WITH CLIENTSECRET
+  useEffect(() => {
+    setStripeOptions({
+      clientSecret: clientSecret,
+      appearance: {
+        theme: 'stripe',
+        variables: {
+          colorPrimary: '#00C220',
+          colorBackground: '#FFFFFF',
+        },
+      },
+    })
+    console.log("SET STRIPE OPTIONS WITH CLIENT SECRET!")
+  },[clientSecret])
+  
   const handleDonationTypeChange = (type: "once" | "monthly") => {
     setDonationType(type);
   };
@@ -70,33 +97,50 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
     } focus:outline-none transition-all duration-200 p-2 rounded-md border-green-500 border border-dashed`;
   };
 
-  useEffect(() => {
-    const baseAmount = Number(customAmount) || donationAmount || 0;
-    const fee = coverFees ? TRANSACTION_FEE : 0;
-    const newTotalAmount = baseAmount + fee;
-    setTotalAmount(newTotalAmount);
 
-    if (newTotalAmount > 0) {
-      setStripeOptions({
-        mode: "payment",
-        amount: newTotalAmount * 100,
-        currency: "usd",
-        
-      });
-    }
-  }, [customAmount, donationAmount, coverFees]);
-
-  const handleDonateClick = () => {
+  const handleDonateClick = async () => {
     if (Number(customAmount) || donationAmount > 0) {
-    setStep("payment");
-  } else {
-    alert("Please enter a valid donation amount.");
-  }
-};
+      try {
+        const response = await fetch('/api/create-payment-intent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: totalAmount,
+            nonprofitId,
+          }),
+        });
 
+        const data = await response.json();
+        if (response.ok) {
+          setClientSecret(data.clientSecret);
+          console.log("GOT SECRET: ",data.clientSecret, "AMOUNT: ", totalAmount)
+          setStep("payment");
+        } else {
+          alert(data.error);
+        }
+      } catch (error) {
+        console.error('Error creating payment intent:', error);
+        alert('Failed to create payment intent.');
+      }
+    } else {
+      alert("Please enter a valid donation amount.");
+    }
+  };
+  
   const handleBackClick = () => {
     setStep("form");
   };
+
+  const stripePromiseMemo = useMemo(() => {
+    if (connectedAccountId) {
+      stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '', {
+        stripeAccount: connectedAccountId,
+      });
+    }
+    return stripePromise;
+  }, [connectedAccountId]);
 
   return (
     
@@ -107,7 +151,7 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
           <>
             <CardHeader>
             <StepIndicator step='form'/>
-              <CardTitle>Make a Donation </CardTitle>         
+              <CardTitle>Make a Donation</CardTitle>         
               <CardDescription>Monthly giving goes a long way to support our cause!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -165,8 +209,8 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
               </Button>
             </CardFooter>
           </>
-        ) : step === "payment" && stripeOptions && (
-          <Elements stripe={stripePromise} options={stripeOptions}>
+        ) : step === "payment" && stripeOptions &&  (
+          <Elements stripe={stripePromiseMemo} options={stripeOptions}>
           <CheckoutForm nonprofitId={nonprofitId} setPaymentSuccess={setPaymentSuccess} totalAmount={totalAmount} onBack={handleBackClick} />
           </Elements>
         )}

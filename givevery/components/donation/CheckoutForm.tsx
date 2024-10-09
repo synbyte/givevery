@@ -11,29 +11,27 @@ const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess, nonprofitId }:{ 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
   
-      const res = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ amount: totalAmount, nonprofitId: nonprofitId }),
-      });
+      
   
-      const { clientSecret } = await res.json();
+      if (!stripe || !elements) {
+        console.log("ERRORRRRRRRRRRRRR!!!!!!!!!")
+        return;
+      }
   
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
+      const {error} = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url:'https://localhost:3000/done',
         },
       });
   
-      if (result.error) {
-        console.error(result.error.message);
+      if (error) {
+        console.error(error.message);
       } else {
-        if (result.paymentIntent.status === 'succeeded') {
+        
           console.log('Payment succeeded!');
           setPaymentSuccess(true);
-        }
+        
       }
     };
   
