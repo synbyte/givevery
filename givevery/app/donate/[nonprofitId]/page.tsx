@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import DonationForm from '@/app/protected/donation-form/page';
+import DonationForm from '@/app/protected/[nonprofitId]/donation-form/page';
 
 export default async function NonprofitDonationPage({ params }: { params: { nonprofitId: string } }) {
   const supabase = createClient();

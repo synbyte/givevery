@@ -25,7 +25,7 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [stripeOptions, setStripeOptions] = useState(null);
   const TRANSACTION_FEE = 3.25;
-  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null)
+  const [connectedAccountId, setConnectedAccountId] = useState<string>()
   const supabase = createClient();
   const router = Router;
   useEffect(() => {
@@ -40,10 +40,12 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
         console.error('Error fetching connected account ID:', error);
       } else {
         setConnectedAccountId(data.connected_account_id);
+        console.log("Got Connected Account ID!")
       }
     };
   
     fetchConnectedAccountId();
+    
   }, [nonprofitId]);
 
   const handleDonationTypeChange = (type: "once" | "monthly") => {

@@ -19,6 +19,7 @@ export default function Home() {
   const router = Router
   const supabase = createClient();
 
+
   useEffect(() => {
     async function addConnectedAccount(account:any){
       const { data: userData, error: userError } = await supabase.auth.getUser();
