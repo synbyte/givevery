@@ -44,7 +44,7 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
         console.error('Error fetching connected account ID:', error);
       } else {
         setConnectedAccountId(data.connected_account_id);
-        console.log("Got Connected Account ID!")
+        console.log("Got Connected Account ID!", data.connected_account_id)
       }
     };
   
@@ -63,7 +63,7 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
   // SET STRIPEOPTIONS WITH CLIENTSECRET
   useEffect(() => {
     setStripeOptions({
-      clientSecret: clientSecret,
+      clientSecret,
       appearance: {
         theme: 'stripe',
         variables: {
@@ -72,7 +72,7 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
         },
       },
     })
-    console.log("SET STRIPE OPTIONS WITH CLIENT SECRET!")
+    console.log("SET STRIPE OPTIONS WITH CLIENT SECRET!", clientSecret)
   },[clientSecret])
   
   const handleDonationTypeChange = (type: "once" | "monthly") => {
@@ -115,7 +115,8 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
         const data = await response.json();
         if (response.ok) {
           setClientSecret(data.clientSecret);
-          console.log("GOT SECRET: ",data.clientSecret, "AMOUNT: ", totalAmount)
+          setStripeOptions
+          console.log("GOT SECRET: ",data.clientSecret, "AMOUNT: ", totalAmount, stripePromiseMemo)
           setStep("payment");
         } else {
           alert(data.error);
