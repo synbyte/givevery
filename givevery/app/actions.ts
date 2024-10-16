@@ -32,7 +32,7 @@ export const signUpAction = async (formData: FormData) => {
   if (authData.user) {
     const { error: nonprofitError } = await supabase
       .from('nonprofits')
-      .insert({ id: authData.user.id, name: email[0] }); // Using email prefix as a temporary name
+      .insert({ id: authData.user.id, name: email }); // Using email prefix as a temporary name
 
     if (nonprofitError) {
       console.error("Error creating nonprofit record:", nonprofitError);
@@ -61,7 +61,7 @@ export const signInAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
-  return redirect(`/protected/${data.user.id}/`);
+  return redirect(`./protected/${data.user.id}/`);
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
@@ -138,5 +138,5 @@ export const resetPasswordAction = async (formData: FormData) => {
 export const signOutAction = async () => {
   const supabase = createClient();
   await supabase.auth.signOut();
-  return redirect("/sign-in");
+  return redirect("/");
 };

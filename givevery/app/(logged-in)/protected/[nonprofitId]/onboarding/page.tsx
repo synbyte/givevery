@@ -40,6 +40,7 @@ export default function Home() {
                     }
                   if(error){setError(true)}
     }
+    console.log("Added connectedAccountId to nonprofit!")
     addConnectedAccount(connectedAccountId);
   },[connectedAccountId])
 

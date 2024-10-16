@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 
 export default async function ProtectedPage({params}) {
   const supabase = createClient();
+  const { nonprofitId } = params
   
   const {
     data: { user },
@@ -15,10 +16,10 @@ export default async function ProtectedPage({params}) {
     return redirect("/sign-in");
   }
 
-  const { data: connected_account_id, error } = await supabase.from("nonprofits").select("connected_account_id").eq('id',user.id).single()
+  const { data, error } = await supabase.from("nonprofits").select("connected_account_id").eq('id',user.id).single()
 
-  if (!connected_account_id)
-    return redirect("/protected/onboarding")
+  if (!data?.connected_account_id)
+    return redirect(`/protected/${nonprofitId}/onboarding`)
 
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
@@ -26,7 +27,7 @@ export default async function ProtectedPage({params}) {
         <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
           <InfoIcon size="16" strokeWidth={2} />
           This is a protected page that you can only see as an authenticated { params.nonprofitId}
-          user
+          user 
         </div>
       </div>
       <div className="flex flex-col gap-2 items-start">
