@@ -8,6 +8,9 @@ import {
     ConnectComponentsProvider } from "@stripe/react-connect-js"
 
 export default function Page() {
+  const [ donations, setDonations ] = useState()
+  const [ totalDonations, setTotalDonations ] = useState()
+  const [ averageDonation, setAverageDonation ] = useState()
     const [ connectedAccountId, setConnectedAccountId ] = useState()
     const stripeConnectInstance = useStripeConnect(connectedAccountId)
     const router = useParams()
@@ -16,6 +19,8 @@ export default function Page() {
 
     // SET connectedAccountId from DB
   useEffect(() => {
+   
+
     const fetchConnectedAccountId = async () => {
       const { data, error } = await supabase
         .from('nonprofits')
@@ -33,16 +38,46 @@ export default function Page() {
   
     fetchConnectedAccountId();
     
+    
   }, [nonprofitId]);
 
   useEffect(() => {
+    const fetchDonations = async (account) => {
+      const response = await fetch('/api/list-payment-intents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          connectedAccountId: account,
+        })
+      })
+      const data = await response.json();
+      console.log(data)
+      setDonations(data)
+      
+      if (Array.isArray(data)) {
+        const total = data.reduce((sum: number, donation: Donation) => sum + donation.amount, 0);
+        setTotalDonations(total);
+        setAverageDonation(total / data.length || 0);
+      } else {
+        console.error('Data is not an array:', data);
+        setTotalDonations(0);
+        setAverageDonation(0);
+      }
+
+
+  }
+  if (connectedAccountId) {
+  fetchDonations(connectedAccountId);
+  }
     
   },[connectedAccountId])
 
     return (
         <div className="flex-1 flex flex-col w-full gap-12 space-y-6">
         <div className="w-full border-b">
-            <p className="text-2xl font-bold">Transactions</p>
+            <p className="text-2xl font-bold">Transactions DONATIONS:{totalDonations} AVG:{averageDonation}</p>
         </div>
         <div className="w-full">
             { connectedAccountId && stripeConnectInstance && (
