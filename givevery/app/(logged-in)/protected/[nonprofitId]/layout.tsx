@@ -26,9 +26,9 @@ export default function RootLayout({
 }) {
   return (
     <html>
-      <body>
-    <section className="">
-    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
+      <body className="">
+    <section className="h-full">
+    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 absolute top-0">
                 <div className="w-full flex justify-between items-center p-3 px-5 text-sm">
                   <div className="flex gap-5 items-center font-semibold">
                     <Link href={"/"}>Next.js Supabase Starter</Link>
@@ -40,7 +40,7 @@ export default function RootLayout({
                 </div>
               </nav>
       <Sidebar id={params.nonprofitId}/>
-      <div className="ml-64 p-10">
+      <div className="flex justify-center ml-64 p-10 h-full pt-20 ">
       {children}
       </div>
     </section>
