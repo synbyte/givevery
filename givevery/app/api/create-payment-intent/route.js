@@ -19,11 +19,11 @@ export async function POST(request) {
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount * 100, // amount in cents
-      currency: 'cad',
+      currency: 'usd',
       automatic_payment_methods: {
         enabled: true,
       },
-      application_fee_amount: amount * 0.04,
+      application_fee_amount: amount * 100 * 0.04,
     },{
       stripeAccount: connectedAccountId,
     });
