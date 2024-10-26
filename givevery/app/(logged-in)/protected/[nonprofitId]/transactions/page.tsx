@@ -7,6 +7,8 @@ import {
     ConnectPayments, 
     ConnectComponentsProvider } from "@stripe/react-connect-js"
 
+
+
 export default function Page() {
   const [ donations, setDonations ] = useState()
   const [ totalDonations, setTotalDonations ] = useState()
@@ -79,7 +81,7 @@ export default function Page() {
         <div className="w-full border-b">
             <p className="text-2xl font-bold">Your Overview</p>
         </div>
-        <div className="w-full">
+        <div className="w-full">           
             { connectedAccountId && stripeConnectInstance && (
                 <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
                     <ConnectPayments/>

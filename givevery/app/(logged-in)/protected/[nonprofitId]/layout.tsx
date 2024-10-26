@@ -1,13 +1,17 @@
-import DeployButton from "@/components/deploy-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import HeaderAuth from "@/components/header-auth";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
-import { GeistSans } from "geist/font/sans";
+import { Quicksand } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import Sidebar from "@/components/sidebar";
 import "@/app/globals.css";
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -25,17 +29,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html>
-      <body className="">
+    <html className={quicksand.className} lang="en">
+      <body className="bg-background text-foreground">
+        <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem
+        disableTransitionOnChange>
     <section className="h-full">
     <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 absolute top-0">
-                <div className="w-full flex justify-between items-center p-3 px-5 text-sm">
-                  <div className="flex gap-5 items-center font-semibold">
-                    <Link href={"/"}>Next.js Supabase Starter</Link>
-                    <div className="flex items-center gap-2">
-                      
-                    </div>
-                  </div>
+                <div className="w-full flex justify-end items-center p-3 px-5 text-sm">
+                  
                   {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
                 </div>
               </nav>
@@ -44,6 +48,8 @@ export default function RootLayout({
       {children}
       </div>
     </section>
+      <footer className="text-center"><ThemeSwitcher /></footer>
+    </ThemeProvider>
     </body>
     </html>
   );

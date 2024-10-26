@@ -5,6 +5,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { createClient } from "@/utils/supabase/server";
 import { Settings } from "lucide-react";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export default async function AuthButton() {
   const {
@@ -52,6 +53,7 @@ export default async function AuthButton() {
     <div className="flex items-center gap-4">
       Hey, {user.email}!
       <Button variant={"secondary"}><Link href={`/protected/${nonprofitId}/settings`}><Settings size={16} /></Link></Button>
+      <ThemeSwitcher />
       <form action={signOutAction}>
         <Button type="submit" variant={"outline"}>
           Sign out

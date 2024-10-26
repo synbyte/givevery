@@ -27,6 +27,7 @@ export async function POST(request) {
     },{
       stripeAccount: connectedAccountId,
     });
+    
 
     console.log('payment succeeded!')
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });

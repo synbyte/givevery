@@ -31,22 +31,20 @@ export const useStripeConnect = (connectedAccountId) => {
         loadConnectAndInitialize({
           publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
           fetchClientSecret,
+          fonts: [
+            {
+              url: "https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap",
+              family: "Quicksand",
+            },
+          ],
           appearance: {
-            overlays: "modal",
-
+            theme: "night",
             variables: {
-              colorPrimary: "#00C220",
-              colorBackground: "#FFFFFF",
-              buttonPrimaryColorBackground: "#08D42A",
-              buttonPrimaryColorBorder: "#4DFF6A",
-              buttonPrimaryColorText: "#FFFFFF",
-              borderRadius: "24px",
-              colorBorder:"#000000",
-              formBorderRadius: "24px",
-              overlayBorderRadius: "24px",
-              overlayZIndex: 5,
-              spacingUnit: "8px",
-              fontFamily: "Roboto",
+              colorPrimary: "#00DB25",
+              badgeNeutralColorBackground: "#2DA9A9",
+              badgeNeutralColorBorder: "#26E1F2",
+              badgeSuccessColorBackground: "#133D00",
+              fontFamily:"Quicksand",
             },
           },
         })
