@@ -33,18 +33,13 @@ export const useStripeConnect = (connectedAccountId) => {
           fetchClientSecret,
           fonts: [
             {
-              url: "https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap",
-              family: "Quicksand",
+              cssSrc: "https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap",
             },
           ],
           appearance: {
-            theme: "night",
             variables: {
               colorPrimary: "#00DB25",
-              badgeNeutralColorBackground: "#2DA9A9",
-              badgeNeutralColorBorder: "#26E1F2",
-              badgeSuccessColorBackground: "#133D00",
-              fontFamily:"Quicksand",
+              fontFamily:"'Quicksand', sans-serif",
             },
           },
         })

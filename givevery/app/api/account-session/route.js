@@ -7,7 +7,13 @@ export async function POST(req) {
       const accountSession = await stripe.accountSessions.create({
         account: body.account,
         components: {
+          notification_banner: { enabled: true },
           account_onboarding: { enabled: true },
+          account_management: { enabled: true,
+            features: {
+              external_account_collection: true
+            },
+           },
           payments: { 
             enabled: true,
             features: {

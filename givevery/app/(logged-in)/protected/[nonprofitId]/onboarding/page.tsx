@@ -73,12 +73,12 @@ export default function Home() {
   },[connectedAccountId])
  
   return (
-    <div className="flex-col flex space-y-5 h-full">
-      <div className="flex justify-center">
-        <p className="text-5xl my-5">Welcome to Givevery</p>
+    <div className="flex-1 flex flex-col w-full space-y-2">
+      <div className="w-full border-b">
+        <p className="text-2xl font-bold">Welcome to Givevery</p>
       </div>
       <div className="content">
-        {!connectedAccountId && <p className="text-2xl">First things first!</p>}
+        {!connectedAccountId && <p className="text-xl">First things first!</p>}
         {!connectedAccountId && <p>In order to accept donations, you need connect your stripe account to the platform.</p>}
         {connectedAccountId && <h2>Add information to start accepting money</h2>}
         {connectedAccountId && <p>Matt's Mats partners with Stripe to help you receive payments while keeping your personal and bank details secure.</p>}

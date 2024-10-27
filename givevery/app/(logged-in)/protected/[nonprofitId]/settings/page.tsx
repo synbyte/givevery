@@ -1,25 +1,70 @@
-import { createClient } from "@/utils/supabase/server"
-import { Button } from "@/components/ui/button"
-export default async function Page({params}) {
-    const supabase = createClient()
-    const { data:nonprofit, error } = await supabase.from('nonprofits').select('*').eq('id', params.nonprofitId).single()
-    if (error) {
-        console.log(error)
-    } else {
-        console.log(nonprofit)
-    }
-    
-    return <div className="flex flex-col space-y-5">
-        <p className="text-5xl">Settings Page</p>
-              {!nonprofit.connected_account_id ? (
-                <>
-                  <p>You need to connect your stripe account to the platform before you can accept donations!</p>
-                  <Button>Connect account</Button>
-                </>
-              ) : (<span className="flex">
-                <p className="px-1">Account succesfully connected: </p>
-                <p className="uppercase text-xs"> {nonprofit.connected_account_id}</p>
-                </span>
-              )}
-        </div>
+"use client"
+import { createClient } from "@/utils/supabase/client"
+import { useParams } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useStripeConnect } from "@/hooks/useStripeConnect"
+import {stripe} from "@/utils/utils"
+import {
+  ConnectAccountManagement,
+  ConnectAccountOnboarding,
+  ConnectNotificationBanner,
+  ConnectComponentsProvider
+} from "@stripe/react-connect-js"
+
+
+
+
+export default function Page() {
+  const [missingReqs, setMissingReqs] = useState()
+  const [connectedAccountId, setConnectedAccountId] = useState()
+  const stripeConnectInstance = useStripeConnect(connectedAccountId)
+  const router = useParams()
+  const { nonprofitId } = router;
+  const supabase = createClient()
+  
+
+  // SET connectedAccountId from DB
+  useEffect(() => {
+
+
+    const fetchConnectedAccountId = async () => {
+      const { data, error } = await supabase
+        .from('nonprofits')
+        .select('*')
+        .eq('id', nonprofitId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching connected account ID:', error);
+      } else {
+        setConnectedAccountId(data.connected_account_id);
+        console.log("Got Connected Account ID!", data.connected_account_id)
+      }
+    };
+
+    fetchConnectedAccountId();
+
+
+  }, [nonprofitId]);
+
+
+
+  return (
+    <div className="flex-1 flex flex-col w-full space-y-2">
+      <div className="w-full border-b">
+        <p className="text-2xl font-bold">Settings</p>
+      </div>
+      <div className="w-full">
+        {connectedAccountId && stripeConnectInstance && (
+          <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
+            <ConnectNotificationBanner/>
+            <ConnectAccountManagement collectionOptions={{
+              fields: 'currently_due',
+              futureRequirements: 'include',
+            }} />
+          </ConnectComponentsProvider>
+        )}
+      </div>
+    </div>
+  )
 }

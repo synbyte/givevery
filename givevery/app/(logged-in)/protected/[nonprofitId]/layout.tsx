@@ -36,15 +36,15 @@ export default function RootLayout({
         defaultTheme="light"
         enableSystem
         disableTransitionOnChange>
-    <section className="h-full">
-    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 absolute top-0">
+    <section className="h-full flex flex-col">
+    <nav className="w-full flex justify-center">
                 <div className="w-full flex justify-end items-center p-3 px-5 text-sm">
                   
                   {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
                 </div>
               </nav>
       <Sidebar id={params.nonprofitId}/>
-      <div className="flex justify-center ml-64 p-10 h-full pt-20 ">
+      <div className="flex justify-center ml-64 p-10 h-full">
       {children}
       </div>
     </section>

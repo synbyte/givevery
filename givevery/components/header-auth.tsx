@@ -6,12 +6,21 @@ import { Button } from "./ui/button";
 import { createClient } from "@/utils/supabase/server";
 import { Settings } from "lucide-react";
 import { ThemeSwitcher } from "./theme-switcher";
+import {stripe} from '@/utils/utils'
+
 
 export default async function AuthButton() {
+  
   const {
     data: { user },
   } = await createClient().auth.getUser();
   const nonprofitId = user.id
+  
+  const {data} = await createClient().from('nonprofits').select("*").eq('id',nonprofitId).single()
+  
+  const account = (await stripe.accounts.retrieve(data.connected_account_id)).requirements?.currently_due;
+  console.log(account)
+  
 
   if (!hasEnvVars) {
     return (
@@ -52,7 +61,11 @@ export default async function AuthButton() {
   return user ? (
     <div className="flex items-center gap-4">
       Hey, {user.email}!
+      {account? 
+      <Button className="border border-red-500" variant={"secondary"}><Link className="flex font-bold text-red-500 text-xl justify-center items-center" href={`/protected/${nonprofitId}/settings`}><Settings size={16}/>!</Link></Button>
+      :
       <Button variant={"secondary"}><Link href={`/protected/${nonprofitId}/settings`}><Settings size={16} /></Link></Button>
+      }
       <ThemeSwitcher />
       <form action={signOutAction}>
         <Button type="submit" variant={"outline"}>
