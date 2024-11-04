@@ -3,13 +3,12 @@ import { createClient } from "@/utils/supabase/client"
 import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { useStripeConnect } from "@/hooks/useStripeConnect"
-import {stripe} from "@/utils/utils"
 import {
   ConnectAccountManagement,
-  ConnectAccountOnboarding,
   ConnectNotificationBanner,
   ConnectComponentsProvider
 } from "@stripe/react-connect-js"
+
 
 
 

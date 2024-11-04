@@ -24,7 +24,7 @@ export const metadata = {
 };
 
 export default function RootLayout({
-  children,params
+  children, params
 }: {
   children: React.ReactNode;
 }) {
@@ -32,25 +32,27 @@ export default function RootLayout({
     <html className={quicksand.className} lang="en">
       <body className="bg-background text-foreground">
         <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem
-        disableTransitionOnChange>
-    <section className="h-full flex flex-col">
-    <nav className="w-full flex justify-center">
-                <div className="w-full flex justify-end items-center p-3 px-5 text-sm">
-                  
-                  {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
-                </div>
-              </nav>
-      <Sidebar id={params.nonprofitId}/>
-      <div className="flex justify-center ml-64 p-10 h-full">
-      {children}
-      </div>
-    </section>
-      <footer className="text-center"><ThemeSwitcher /></footer>
-    </ThemeProvider>
-    </body>
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange>
+          <main className="h-full flex flex-col">
+            
+            <Sidebar id={params.nonprofitId} />
+            
+            <div className="flex flex-col justify-center ml-64 px-10 h-full">
+            <nav className="">
+              <div className="w-full flex justify-end items-center p-3 px-5 text-sm">
+
+                {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
+              </div>
+            </nav>
+              {children}
+            </div>
+          </main>
+          <footer className="text-center"><ThemeSwitcher /></footer>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

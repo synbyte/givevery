@@ -14,18 +14,18 @@ export default async function AuthButton() {
   const {
     data: { user },
   } = await createClient().auth.getUser();
-  const nonprofitId = user.id
+  const nonprofitId = user?.id
   
   const {data} = await createClient().from('nonprofits').select("*").eq('id',nonprofitId).single()
   
   const account = (await stripe.accounts.retrieve(data.connected_account_id)).requirements?.currently_due;
-  console.log(account)
+  console.log("Reqs Due: ",account)
   
 
   if (!hasEnvVars) {
     return (
       <>
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-6 items-center">
           <div>
             <Badge
               variant={"default"}
@@ -59,16 +59,16 @@ export default async function AuthButton() {
     );
   }
   return user ? (
-    <div className="flex items-center gap-4">
-      Hey, {user.email}!
+    <div className="flex items-center gap-2">
+     <p className="text-xs">Logged in as {user.email}!</p>
       {account? 
-      <Button className="border border-red-500" variant={"secondary"}><Link className="flex font-bold text-red-500 text-xl justify-center items-center" href={`/protected/${nonprofitId}/settings`}><Settings size={16}/>!</Link></Button>
+      <Link href={`/protected/${nonprofitId}/settings`}><Button size={'sm'} className="ring-2 text-red-600 font-bold text-xl ring-red-500" variant={"secondary"}><Settings className="text-red-600" size={16}/>!</Button></Link>
       :
-      <Button variant={"secondary"}><Link href={`/protected/${nonprofitId}/settings`}><Settings size={16} /></Link></Button>
+      <Link href={`/protected/${nonprofitId}/settings`}><Button size={'sm'} variant={"secondary"}><Settings size={16} /></Button></Link>
       }
       <ThemeSwitcher />
       <form action={signOutAction}>
-        <Button type="submit" variant={"outline"}>
+        <Button type="submit" variant={"outline"} size={'sm'}>
           Sign out
         </Button>
       </form>
