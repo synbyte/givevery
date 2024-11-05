@@ -34,10 +34,10 @@ export default function Page() {
         .single();
 
       if (error) {
-        console.error('Error fetching connected account ID:', error);
+        console.error('Error fetching connected account ID: ', error);
       } else {
         setConnectedAccountId(data.connected_account_id);
-        console.log("Got Connected Account ID!", data.connected_account_id)
+        console.log("Got Connected Account ID: ", data.connected_account_id)
       }
     };
 
