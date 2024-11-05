@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { loadStripe, Stripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from "@/components/donation/CheckoutForm";
 import SuccessPage from "@/components/donation/SuccessPage";
@@ -18,13 +18,13 @@ let stripePromise: Promise<Stripe | null>;
 
 export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
   const [donationType, setDonationType] = useState<"once" | "monthly">("once");
-  const [donationAmount, setDonationAmount] = useState<number | null>(100);
+  const [donationAmount, setDonationAmount] = useState<number>(100);
   const [customAmount, setCustomAmount] = useState<number>();
   const [coverFees, setCoverFees] = useState(false);
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [step, setStep] = useState<"form" | "payment" | "success">("form");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [stripeOptions, setStripeOptions] = useState(null);
+  const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>();
   const [clientSecret, setClientSecret] = useState()
   const TRANSACTION_FEE = 3.25;
   const [connectedAccountId, setConnectedAccountId] = useState<string>()
@@ -81,12 +81,14 @@ export default function DonationForm({ nonprofitId }: { nonprofitId: string }) {
 
   const handleDonationAmountChange = (amount: number) => {
     setDonationAmount(amount);
-    setCustomAmount("");
+    setCustomAmount(undefined);
   };
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomAmount(e.target.value);
-    setDonationAmount(null);
+    const value = parseFloat(e.target.value);
+    setCustomAmount(isNaN(value) ? undefined : value);
+    setDonationAmount(0); // Changed from null to 0 to match number type
+
   };
 
   const getButtonClass = (isSelected: boolean) => {
