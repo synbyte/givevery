@@ -8,13 +8,13 @@ const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess, nonprofitId }:{ 
     const stripe = useStripe();
     const elements = useElements();
   
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: any) => {
       event.preventDefault();
   
       
   
       if (!stripe || !elements) {
-        console.log("ERRORRRRRRRRRRRRR!!!!!!!!!")
+        console.log("Stripe or elements hasnt been loaded!")
         return;
       }
   

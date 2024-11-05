@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StepIndicator from "./StepIndicator";
 
 
-const SuccessPage = ({totalAmount}) => {
+const SuccessPage = ({totalAmount}:{totalAmount: number}) => {
     return (
       <Card className="w-full max-w-md mx-auto bg-gradient-to-tl from-green-50 to-green-100 text-black">
         <CardHeader>
