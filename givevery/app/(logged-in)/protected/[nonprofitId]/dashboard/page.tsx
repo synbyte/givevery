@@ -55,6 +55,7 @@ export default function Page() {
       const data = await response.json();
       console.log(data)
       setDonations(data)
+      
       if (Array.isArray(data)) {
         const total = data.reduce((sum: number, donation: { amount: number }) => sum + donation.amount, 0);
         setTotalDonations(total);

@@ -12,8 +12,8 @@ import {
 
 export default function Page() {
   const [donations, setDonations] = useState()
-  const [totalDonations, setTotalDonations] = useState()
-  const [averageDonation, setAverageDonation] = useState()
+  const [totalDonations, setTotalDonations] = useState<number>()
+  const [averageDonation, setAverageDonation] = useState<number>()
   const [connectedAccountId, setConnectedAccountId] = useState()
   const stripeConnectInstance = useStripeConnect(connectedAccountId)
   const router = useParams()
@@ -45,7 +45,7 @@ export default function Page() {
   }, [nonprofitId]);
 
   useEffect(() => {
-    const fetchDonations = async (account) => {
+    const fetchDonations = async (account:string) => {
       const response = await fetch('/api/list-payment-intents', {
         method: 'POST',
         headers: {
@@ -60,7 +60,7 @@ export default function Page() {
       setDonations(data)
 
       if (Array.isArray(data)) {
-        const total = data.reduce((sum: number, donation: Donation) => sum + donation.amount, 0);
+        const total = data.reduce((sum: number, donation: {amount: number}) => sum + donation.amount, 0);
         setTotalDonations(total);
         setAverageDonation(total / data.length || 0);
       } else {
