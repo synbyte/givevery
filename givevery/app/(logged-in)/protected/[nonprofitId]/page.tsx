@@ -4,9 +4,9 @@ import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 
 
-export default async function ProtectedPage({params}) {
+export default async function ProtectedPage({ params }: { params: { nonprofitId: string } }) {
   const supabase = createClient();
-  const { nonprofitId } = params
+  const { nonprofitId } = params;
   
   const {
     data: { user },
