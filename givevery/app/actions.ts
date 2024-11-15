@@ -15,7 +15,7 @@ export const signUpAction = async (formData: FormData) => {
     return { error: "Email and password are required" };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -23,16 +23,29 @@ export const signUpAction = async (formData: FormData) => {
     },
   });
 
-  if (error) {
-    console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
-    );
+  if (authError) {
+    console.error(authError.code + " " + authError.message);
+    return encodedRedirect("error", "/sign-up", authError.message);
   }
+
+  // If sign-up is successful, create a record in the nonprofits table
+  if (authData.user) {
+    const { error: nonprofitError } = await supabase
+      .from('nonprofits')
+      .insert({ id: authData.user.id, name: email }); // Using email prefix as a temporary name
+
+    if (nonprofitError) {
+      console.error("Error creating nonprofit record:", nonprofitError);
+      // You might want to delete the auth user if this fails
+      return encodedRedirect("error", "/sign-up", "Error creating nonprofit profile");
+    }
+  }
+
+  return encodedRedirect(
+    "success",
+    "/sign-up",
+    "Thanks for signing up! Please check your email for a verification link.",
+  );
 };
 
 export const signInAction = async (formData: FormData) => {
