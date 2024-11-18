@@ -31,7 +31,7 @@ export default async function ProtectedLayout({
     <NonprofitProvider nonprofitId={nonprofitId} connectedAccountId={connectedAccount?.connected_account_id}>
       <div className="flex h-screen w-screen justify-end">
         <Sidebar/>
-        <div className="flex-1 ml-64 p-8">
+        <div className="flex-1 ml-64">
           {children}
         </div>
       </div>

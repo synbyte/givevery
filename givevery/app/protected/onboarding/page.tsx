@@ -2,17 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import Router from "next/router";
-import { useParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { useNonprofit } from "@/app/NonprofitContext";
 
 export default function Home() {
   const [accountCreatePending, setAccountCreatePending] = useState(false);
   const [error, setError] = useState(false);
-  const [connectedAccount, setConnectedAccount] = useState();
+  const [connectedAccount, setConnectedAccount] = useState<string | undefined>();
   const [accountLinkCreatePending, setAccountLinkCreatePending] = useState(false);
-  const router = Router
   const supabase = createClient();
   const { nonprofitId, connectedAccountId } = useNonprofit();
 
@@ -49,7 +46,14 @@ export default function Home() {
     
   }) */
 
+  // Check if connected account exists
+  useEffect(() => {
+    if(connectedAccountId){
+      setConnectedAccount(connectedAccountId)
+    }
+  })
 
+  // Create and add connected account to db
   useEffect(() => {
     async function addConnectedAccount(account:any){
       const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -63,6 +67,7 @@ export default function Home() {
                       .from('nonprofits')
                       .update({ connected_account_id: account })
                       .eq('id', userData.user.id);
+                      console.log("Added connectedAccountId to nonprofit: ", connectedAccount)
 
                     if (updateError) {
                       console.error("Error updating nonprofit record:", updateError);
@@ -70,22 +75,39 @@ export default function Home() {
                     }
                   if(error){setError(true)}
     }
-    console.log("Added connectedAccountId to nonprofit: ", connectedAccount)
+    if (connectedAccount){
+      console.log("Got connected account.")
     addConnectedAccount(connectedAccount);
+    }
   },[connectedAccount])
  
   return (
-    <div className="flex-1 flex flex-col w-full space-y-2">
-      <div className="w-full border-b">
-        <p className="text-2xl font-bold">Welcome to Givevery</p>
+    <div className="flex-1 flex flex-col w-full items-center space-y-6">
+      <div className="w-full items-center  border-b">
+        <p className="text-3xl font-bold text-center">Welcome to Givevery {connectedAccountId}</p>
       </div>
-      <div className="content">
-        {!connectedAccountId && <p className="text-xl">First things first!</p>}
-        {!connectedAccountId && <p>In order to accept donations, you need connect your stripe account to the platform.</p>}
-        {connectedAccountId && <h2>Add information to start accepting money</h2>}
-        {connectedAccountId && <p>Matt's Mats partners with Stripe to help you receive payments while keeping your personal and bank details secure.</p>}
-        {!accountCreatePending && !connectedAccountId && (
-          <Button
+      <div className="content flex flex-col space-y-5  max-w-5xl ">
+        {!connectedAccount && <p className="text-xl text-center py-3"><b>Thank you</b> for choosing Givevery as your donation management platform!</p>}
+        {!connectedAccount && <>
+        <p>First things first. Givevery partners with Stripe on the back end for all transactions. This is to ensure secure and efficiant transactions, streamlining the payment process for both you and your donors.</p>
+        <p>In order to start accepting donations, you need connect your stripe account to the platform. If you do not already have a Stripe account, you will be able to create one. Don't worry this is a very simple one-time process that will allow us to get to know you better and allow you to start accepting donations right away!</p>
+        <p>The first step is creating the Givevery connected account, click the button below to do so!</p>
+        </>}
+        {connectedAccount && <p className="text-xl">Great, your Givevery account was succesfully created!</p>
+        }
+        {connectedAccount &&<>
+         <p>The next step is to connect your Stripe account to the Givevery platform. If you don't already have a Stripe account, you'll be able to create one.</p>
+         <p>To complete this step, you will need to have clear understanding of your organizations legal structure, and authority to sign legal documents on behalf of your nonprofit. </p>
+         <p>To make this quick and frictionless, you should have a few things ready:</p>
+         <ul className="list-disc pl-5">
+          <li><b>Business information:</b> Name, address, tax ID numbers.</li>
+          <li><b>Personal information:</b> Name, DOB, address, email, phone, and SSN.</li>
+          <li><b>Proof of Address:</b>A document verifying your business address like bill or bank statement.</li>
+          <li><b>Merchant category code(MCC):</b>This helps identify the type of business.</li></ul>
+          <p>Click the button below when you are ready to begin. A new window will open, when are finished you will be redirected back here.</p>
+         </>}
+        {!accountCreatePending && !connectedAccount && (
+          <Button className="bg-green-500 font-bold ring-2 ring-offset-1 ring-green-700"
             onClick={async () => {
               setAccountCreatePending(true);
               setError(false);
@@ -108,11 +130,11 @@ export default function Home() {
                 });
             }}
           >
-            Create an account!
+            Create Givevery Connected Account!
           </Button>
         )}
-        {connectedAccountId && !accountLinkCreatePending && (
-          <Button
+        {connectedAccount && !accountLinkCreatePending && (
+          <Button className="bg-green-500 font-bold ring-2 ring-offset-1 ring-green-700"
             onClick={async () => {
               setAccountLinkCreatePending(true);
               setError(false);
@@ -122,7 +144,7 @@ export default function Home() {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  account: connectedAccountId,
+                  account: connectedAccount,
                 }),
               })
                 .then((response) => response.json())
@@ -144,18 +166,14 @@ export default function Home() {
           </Button>
         )}
         {error && <p className="error">Something went wrong!</p>}
-        {(connectedAccountId || accountCreatePending || accountLinkCreatePending) && (
+        {(connectedAccount || accountCreatePending || accountLinkCreatePending) && (
           <div className="dev-callout">
-            {connectedAccountId && <p>Your connected account ID is: <code className="bold">{connectedAccountId}</code></p>}
+            {connectedAccount && <p>Your connected account ID is: <code className="bold">{connectedAccount}</code></p>}
             {accountCreatePending && <p>Creating a connected account...</p>}
             {accountLinkCreatePending && <p>Creating a new Account Link...</p>}
           </div>
         )}
-        <div className="info-callout">
-          <p>
-          This is a sample app for Stripe-hosted Connect onboarding. <a href="https://docs.stripe.com/connect/onboarding/quickstart?connect-onboarding-surface=hosted" target="_blank" rel="noopener noreferrer">View docs</a>
-          </p>
-        </div>
+      
       </div>
     </div>
   );
