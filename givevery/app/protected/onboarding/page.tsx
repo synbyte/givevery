@@ -83,8 +83,8 @@ export default function Home() {
  
   return (
     <div className="flex-1 flex flex-col w-full items-center space-y-6">
-      <div className="w-full items-center  border-b">
-        <p className="text-3xl font-bold text-center">Welcome to Givevery {connectedAccountId}</p>
+      <div className="w-full items-center border-b">
+        <p className="text-3xl font-bold text-center pb-3">Welcome to Givevery</p>
       </div>
       <div className="content flex flex-col space-y-5  max-w-5xl ">
         {!connectedAccount && <p className="text-xl text-center py-3"><b>Thank you</b> for choosing Givevery as your donation management platform!</p>}
@@ -103,7 +103,8 @@ export default function Home() {
           <li><b>Business information:</b> Name, address, tax ID numbers.</li>
           <li><b>Personal information:</b> Name, DOB, address, email, phone, and SSN.</li>
           <li><b>Proof of Address:</b>A document verifying your business address like bill or bank statement.</li>
-          <li><b>Merchant category code(MCC):</b>This helps identify the type of business.</li></ul>
+          <li><b>Merchant category code(MCC):</b>This helps identify the type of business.</li>
+          <li><b>Bank account:</b> Information for the bank account you would like donations deposited to.</li></ul>
           <p>Click the button below when you are ready to begin. A new window will open, when are finished you will be redirected back here.</p>
          </>}
         {!accountCreatePending && !connectedAccount && (

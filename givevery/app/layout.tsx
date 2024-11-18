@@ -38,14 +38,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="min-h-screen  flex flex-col items-center">
+          <main className="min-h-screen  flex flex-col items-center ">
             <div className="flex-1 w-full flex flex-col items-center">
               <nav className="w-full flex justify-end h-16">
                 <div className="w-full max-w-5xl flex justify-end p-3 px-5 text-sm">
                   {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
                 </div>
               </nav>
-              <div className="flex flex-col p-8">
+              <div className="flex flex-col px-8 ">
                 {children}
               </div>
 
