@@ -13,38 +13,6 @@ export default function Home() {
   const supabase = createClient();
   const { nonprofitId, connectedAccountId } = useNonprofit();
 
- /*  useEffect(() => {
-    
-        async function checkConnectedAccountId() {
-          try {
-            const { data, error } = await supabase
-              .from('nonprofits')
-              .select('connected_account_id')
-              .eq('id', nonprofitId)
-              .single();
-    
-            if (error) {
-              console.error("Error checking connected_account_id:", error);
-              setError(true);
-              return false;
-            }
-    
-            if (data && data.connected_account_id) {
-              setConnectedAccountId(data.connected_account_id);
-              return true;
-            }
-    
-            return false;
-          } catch (err) {
-            console.error("Unexpected error:", err);
-            setError(true);
-            return false;
-          }
-        }
-    
-        checkConnectedAccountId();
-    
-  }) */
 
   // Check if connected account exists
   useEffect(() => {
@@ -83,19 +51,18 @@ export default function Home() {
  
   return (
     <div className="flex-1 flex flex-col w-full items-center space-y-6">
-      <div className="w-full items-center border-b">
-        <p className="text-3xl font-bold text-center pb-3">Welcome to Givevery</p>
+      <div className="w-full border-b">
+        <p className="text-3xl font-bold pb-3">Onboarding</p>
       </div>
       <div className="content flex flex-col space-y-5  max-w-5xl ">
-        {!connectedAccount && <p className="text-xl text-center py-3"><b>Thank you</b> for choosing Givevery as your donation management platform!</p>}
         {!connectedAccount && <>
+        <p className="text-2xl text-center py-3"><b>Welcome & thank you</b> for picking Givevery to handle your donations!</p>
         <p>First things first. Givevery partners with Stripe on the back end for all transactions. This is to ensure secure and efficiant transactions, streamlining the payment process for both you and your donors.</p>
         <p>In order to start accepting donations, you need connect your stripe account to the platform. If you do not already have a Stripe account, you will be able to create one. Don't worry this is a very simple one-time process that will allow us to get to know you better and allow you to start accepting donations right away!</p>
         <p>The first step is creating the Givevery connected account, click the button below to do so!</p>
         </>}
-        {connectedAccount && <p className="text-xl">Great, your Givevery account was succesfully created!</p>
-        }
-        {connectedAccount &&<>
+        {connectedAccount && <>
+        <p className="text-xl">Great, your Givevery account was succesfully created!</p>
          <p>The next step is to connect your Stripe account to the Givevery platform. If you don't already have a Stripe account, you'll be able to create one.</p>
          <p>To complete this step, you will need to have clear understanding of your organizations legal structure, and authority to sign legal documents on behalf of your nonprofit. </p>
          <p>To make this quick and frictionless, you should have a few things ready:</p>
@@ -169,7 +136,6 @@ export default function Home() {
         {error && <p className="error">Something went wrong!</p>}
         {(connectedAccount || accountCreatePending || accountLinkCreatePending) && (
           <div className="dev-callout">
-            {connectedAccount && <p>Your connected account ID is: <code className="bold">{connectedAccount}</code></p>}
             {accountCreatePending && <p>Creating a connected account...</p>}
             {accountLinkCreatePending && <p>Creating a new Account Link...</p>}
           </div>

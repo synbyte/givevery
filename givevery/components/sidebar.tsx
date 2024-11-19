@@ -1,6 +1,8 @@
 'use client'
 import Link from "next/link";
 import { useNonprofit } from "@/app/NonprofitContext";
+import Image from "next/image";
+import logo from "@/app/logo.svg"
 
 export default function Sidebar() {
     const { nonprofitId, connectedAccountId } = useNonprofit();
@@ -8,19 +10,21 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-gradient-to-b from-white to-gray-100  text-black flex flex-col p-4 h-full fixed left-0 top-0">
-      <h2 className="text-lg font-bold mb-4">Navigation</h2>
-      <nav className="flex flex-col gap-2 text-sm">
+      <div className="flex justify-start p-2">
+        <Image className="w-2/3" width={808} height={523} alt="Givevery Logo"  src={logo}></Image>
+        </div>
+      <nav className="flex flex-col gap-2 text-md ">
         <Link href={`/protected/`}>
-          <p className="hover:bg-gray-700 p-2 rounded">Home</p>
+          <p className="hover:bg-lime-400 p-2 rounded">Home</p>
         </Link>
         <Link href={`/protected/transactions`}>
-          <p className="hover:bg-gray-700 p-2 rounded">Transactions</p>
+          <p className="hover:bg-lime-400 p-2 rounded">Transactions</p>
         </Link>
-        <Link href="/profile">
-          <p className="hover:bg-gray-700 p-2 rounded">Donation Forms</p>
+        <Link href="/protected/form">
+          <p className="hover:bg-lime-400 p-2 rounded">Donation Form</p>
         </Link>
         <Link href="/settings">
-          <p className="hover:bg-gray-700 p-2 rounded"> </p>
+          <p className="hover:bg-lime-400 p-2 rounded"> </p>
         </Link>
         
       </nav>
