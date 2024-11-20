@@ -1,6 +1,5 @@
 "use client"
 import { createClient } from "@/utils/supabase/client"
-import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { useStripeConnect } from '@/hooks/useStripeConnect'
 import { useNonprofit } from "@/app/NonprofitContext"
