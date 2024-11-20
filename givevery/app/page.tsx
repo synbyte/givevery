@@ -1,13 +1,13 @@
-import Hero from "@/components/hero";
-import ConnectSupabaseSteps from "@/components/tutorial/connect-supabase-steps";
-import SignUpUserSteps from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
+import logo from "@/app/logo.svg";
+import Image from "next/image";
 
 export default async function Index() {
   return (
     <>
-      <main className="flex-1 flex flex-col gap-6 px-4">
-        <p>Sign up</p>
+      <main className="flex-1 flex flex-col w-1/2 mx-auto h-full justify-center gap-6 px-4">
+        <p className="text-5xl">Welcome to</p>
+        <Image className="flex mx-auto" alt="Givevery logo" src={logo}></Image>
+        <p className="flex text-5xl justify-end">Sign up to get started!</p>
       </main>
     </>
   );

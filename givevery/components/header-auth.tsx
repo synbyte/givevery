@@ -48,7 +48,7 @@ export default async function AuthButton() {
   }
   return user ? (
     <div className="flex items-center gap-4">
-      Logged in as {user.email}!
+      <Badge variant={"outline"}>Logged in as {user.email}!</Badge>
       <form action={signOutAction}>
         <Button type="submit" variant={"outline"}>
           Sign out
