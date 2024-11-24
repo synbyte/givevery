@@ -1,22 +1,30 @@
 "use client";
+import { useEffect } from "react";
 import { useNonprofit } from "../NonprofitContext";
 import { useRouter } from "next/navigation";
 
-export default async function ProtectedPage() {
+
+export default function ProtectedPage() {
   const r = useRouter();
 
   const { nonprofitId, connectedAccountId } = useNonprofit();
 
   // If no profile or onboarding not completed, redirect to onboarding
+  useEffect(() => {
+    if (!connectedAccountId) {
+      console.log("No connected account, redirecting to onboarding!")
+      r.push("/protected/onboarding");
+    }
+  }, [connectedAccountId, r])
+  
   if (!connectedAccountId) {
-    console.log("No connected account, redirecting to onboarding!");
-    return r.push("/protected/onboarding");
+      return null
   }
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-12">
+    <div className="flex flex-col flex-1 gap-12 w-full">
       <div className="w-full border-b">
-        <p className="text-3xl font-bold pb-3">Your Overview</p>
+        <p className="pb-3 text-3xl font-bold">Your Overview</p>
       </div>
     </div>
   );

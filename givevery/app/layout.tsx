@@ -52,7 +52,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {isDonationPage ? <div>{children}</div> :
-            <main className="min-h-screen  flex flex-col items-center ">
+            <main className="min-h-screen flex flex-col items-center ">
               <div className="flex-1 w-full flex flex-col items-center">
                 <nav className="w-full flex justify-end h-16 border-b fixed bg-gradient-to-r from-white to-lime-50">
                   <div className="w-full max-w-5xl flex justify-end p-3 px-5 text-sm">
@@ -72,7 +72,7 @@ export default function RootLayout({
                       className="font-bold hover:underline"
                       rel="noreferrer"
                     >
-                      Supabase {isDonationPage ? "true" : "false"}
+                      Givevery
                     </a>
                   </p>
                   <ThemeSwitcher />

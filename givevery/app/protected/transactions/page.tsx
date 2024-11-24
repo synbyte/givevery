@@ -55,9 +55,9 @@ export default function Page() {
   }, [connectedAccountId])
 
   return (
-    <div className="flex-1 flex flex-col w-full space-y-2">
+    <div className="flex flex-col flex-1 space-y-2 w-full">
       <div className="w-full border-b">
-        <p className="text-3xl font-bold pb-3">Transactions</p>
+        <p className="pb-3 text-3xl font-bold">Transactions</p>
       </div>
       <div className="w-full">
         {connectedAccountId && stripeConnectInstance && (
