@@ -54,12 +54,12 @@ export default function RootLayout({
           {isDonationPage ? <div>{children}</div> :
             <main className="min-h-screen  flex flex-col items-center ">
               <div className="flex-1 w-full flex flex-col items-center">
-                <nav className="w-full flex justify-end h-16">
+                <nav className="w-full flex justify-end h-16 border-b fixed bg-gradient-to-r from-white to-lime-50">
                   <div className="w-full max-w-5xl flex justify-end p-3 px-5 text-sm">
                     {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
                   </div>
                 </nav>
-                <div className="flex flex-col px-8 ">
+                <div className="flex-1 flex flex-col h-full w-full items-center px-8 mt-16">
                   {children}
                 </div>
 
