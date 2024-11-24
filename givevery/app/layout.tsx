@@ -1,13 +1,12 @@
-import DeployButton from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import HeaderAuth from "@/components/header-auth";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
-import { GeistSans } from "geist/font/sans";
-import {Quicksand} from 'next/font/google'
-import { ThemeProvider } from "next-themes";
-import Link from "next/link";
-import "./globals.css";
+import './globals.css';
+import { headers } from 'next/headers';
+
+import { EnvVarWarning } from '@/components/env-var-warning';
+import HeaderAuth from '@/components/header-auth';
+import { ThemeSwitcher } from '@/components/theme-switcher';
+import { hasEnvVars } from '@/utils/supabase/check-env-vars';
+import { ThemeProvider } from 'next-themes';
+import { Quicksand } from 'next/font/google';
 
 const quicksand = Quicksand({
   subsets: ["latin"],
@@ -28,7 +27,21 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}) {
+  }) {
+  const headersList = headers();
+  const pathname = headersList.get("x-url-pathname") || '';
+  const isDonationPage = pathname.includes("/donate")
+
+/*   if (isDonationPage) {
+    return (
+      <html lang="en">
+      <body>
+        {children}
+      </body>
+      </html>
+    )
+  }
+   */
   return (
     <html lang="en" className={quicksand.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
@@ -38,33 +51,34 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="min-h-screen  flex flex-col items-center ">
-            <div className="flex-1 w-full flex flex-col items-center">
-              <nav className="w-full flex justify-end h-16">
-                <div className="w-full max-w-5xl flex justify-end p-3 px-5 text-sm">
-                  {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
+          {isDonationPage ? <div>{children}</div> :
+            <main className="min-h-screen  flex flex-col items-center ">
+              <div className="flex-1 w-full flex flex-col items-center">
+                <nav className="w-full flex justify-end h-16">
+                  <div className="w-full max-w-5xl flex justify-end p-3 px-5 text-sm">
+                    {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
+                  </div>
+                </nav>
+                <div className="flex flex-col px-8 ">
+                  {children}
                 </div>
-              </nav>
-              <div className="flex flex-col px-8 ">
-                {children}
-              </div>
 
-              <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-                <p>
-                  Powered by{" "}
-                  <a
-                    href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-                    target="_blank"
-                    className="font-bold hover:underline"
-                    rel="noreferrer"
-                  >
-                    Supabase
-                  </a>
-                </p>
-                <ThemeSwitcher />
-              </footer>
-            </div>
-          </main>
+                <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
+                  <p>
+                    Powered by{" "}
+                    <a
+                      href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
+                      target="_blank"
+                      className="font-bold hover:underline"
+                      rel="noreferrer"
+                    >
+                      Supabase {isDonationPage ? "true" : "false"}
+                    </a>
+                  </p>
+                  <ThemeSwitcher />
+                </footer>
+              </div>
+            </main>}
         </ThemeProvider>
       </body>
     </html>

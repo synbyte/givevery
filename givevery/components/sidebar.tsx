@@ -11,7 +11,7 @@ export default function Sidebar() {
   return (
     <aside className="w-64 bg-gradient-to-b from-white to-gray-100  text-black flex flex-col p-4 h-full fixed left-0 top-0">
       <div className="flex justify-start p-2">
-        <Image className="w-2/3" width={808} height={523} alt="Givevery Logo"  src={logo}></Image>
+        <Image className="w-1/2 mx-auto" width={808} height={523} alt="Givevery Logo"  src={logo}></Image>
         </div>
       <nav className="flex flex-col gap-2 text-md ">
         <Link href={`/protected/`}>
@@ -25,6 +25,9 @@ export default function Sidebar() {
         </Link>
         <Link href="/settings">
           <p className="hover:bg-lime-400 p-2 rounded"> </p>
+        </Link>
+        <Link href="/donate/123">
+          <p>Donate</p>
         </Link>
         
       </nav>
