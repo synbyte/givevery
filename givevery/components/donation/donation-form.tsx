@@ -23,7 +23,7 @@ import Router from "next/router";
 
 let stripePromise: Promise<Stripe | null>;
 
-export default function DonationForm({ nonprofitId, buttonColor, buttonTextColor }: { nonprofitId: string, buttonColor: string, buttonTextColor: string }) {
+export default function DonationForm({ nonprofitId, buttonColor, buttonTextColor }: { nonprofitId: string | undefined, buttonColor: string, buttonTextColor: string }) {
   const [donationType, setDonationType] = useState<"once" | "monthly">("once");
   const [donationAmount, setDonationAmount] = useState<number>(100);
   const [customAmount, setCustomAmount] = useState<number>();
