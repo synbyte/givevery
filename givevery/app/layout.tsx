@@ -1,12 +1,12 @@
-import './globals.css';
-import { headers } from 'next/headers';
+import "./globals.css";
+import { headers } from "next/headers";
 
-import { EnvVarWarning } from '@/components/env-var-warning';
-import HeaderAuth from '@/components/header-auth';
-import { ThemeSwitcher } from '@/components/theme-switcher';
-import { hasEnvVars } from '@/utils/supabase/check-env-vars';
-import { ThemeProvider } from 'next-themes';
-import { Quicksand } from 'next/font/google';
+import { EnvVarWarning } from "@/components/env-var-warning";
+import HeaderAuth from "@/components/header-auth";
+import { ThemeSwitcher } from "@/components/theme-switcher";
+import { hasEnvVars } from "@/utils/supabase/check-env-vars";
+import { ThemeProvider } from "next-themes";
+import { Quicksand } from "next/font/google";
 
 const quicksand = Quicksand({
   subsets: ["latin"],
@@ -27,12 +27,12 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-  }) {
+}) {
   const headersList = headers();
-  const pathname = headersList.get("x-url-pathname") || '';
-  const isDonationPage = pathname.includes("/donate")
+  const pathname = headersList.get("x-url-pathname") || "";
+  const isDonationPage = pathname.includes("/donate");
 
-/*   if (isDonationPage) {
+  /*   if (isDonationPage) {
     return (
       <html lang="en">
       <body>
@@ -43,7 +43,11 @@ export default function RootLayout({
   }
    */
   return (
-    <html lang="en" className={quicksand.className} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={quicksand.className}
+      suppressHydrationWarning
+    >
       <body className="bg-background text-foreground">
         <ThemeProvider
           attribute="class"
@@ -51,10 +55,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {isDonationPage ? <div>{children}</div> :
+          {isDonationPage ? (
+            <div>{children}</div>
+          ) : (
             <main className="min-h-screen flex flex-col items-center ">
               <div className="flex-1 w-full flex flex-col items-center">
-                <nav className="w-full flex justify-end h-16 border-b fixed bg-gradient-to-r from-white to-lime-50">
+                <nav className="w-full flex justify-end h-16 border-b fixed bg-gradient-to-r from-white to-lime-50 dark:from-transparent dark:to-black">
                   <div className="w-full max-w-5xl flex justify-end p-3 px-5 text-sm">
                     {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
                   </div>
@@ -78,7 +84,8 @@ export default function RootLayout({
                   <ThemeSwitcher />
                 </footer>
               </div>
-            </main>}
+            </main>
+          )}
         </ThemeProvider>
       </body>
     </html>
