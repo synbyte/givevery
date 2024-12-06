@@ -3,12 +3,12 @@ import DonationForm from '@/components/newform/donationForm'
 
 type Props = {
   params: {
-    nonprofitId: string
+    connectedAccountId: string
   }
 }
 
 export default function page({ params }: Props) {
   return (
-    <div><DonationForm connectedAccountId={params.nonprofitId}/></div>
+    <div><DonationForm connectedAccountId={params.connectedAccountId}/></div>
   )
 }

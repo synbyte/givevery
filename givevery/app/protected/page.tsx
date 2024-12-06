@@ -26,6 +26,8 @@ export default function ProtectedPage() {
       <div className="w-full border-b">
         <p className="pb-3 text-3xl font-bold">Your Overview</p>
       </div>
+      <p>Connected Account ID: {connectedAccountId}</p>
+      <p>Nonprofit ID: {nonprofitId}</p>
     </div>
   );
 }

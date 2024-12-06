@@ -8,7 +8,7 @@ import { cn } from "@/utils/cn";
 import { memo } from "react";
 
 const Sidebar = memo(function Sidebar() {
-  const pathname = usePathname();
+  const pathname = typeof window !== "undefined" ? usePathname() : "";
     const { nonprofitId, connectedAccountId } = useNonprofit();
 
 
@@ -27,7 +27,7 @@ const Sidebar = memo(function Sidebar() {
         <Link href="/protected/form">
           <p className={cn("p-2 rounded hover:bg-lime-400 transition-all", pathname === "/protected/form" && "font-bold ring-2 ring-lime-500")}>Donation Form</p>
         </Link>
-        <Link href="/donate/123">
+        <Link href="/donate/acct_1QMhUgFJL4lxWA3R">
           <p>Donate</p>
         </Link>
         
