@@ -23,7 +23,7 @@ import Router from "next/router";
 
 let stripePromise: Promise<Stripe | null>;
 
-export default function DonationForm({ nonprofitId, buttonColor, buttonTextColor }: { nonprofitId: string | undefined, buttonColor: string, buttonTextColor: string }) {
+export default function DonationForm({ connectedAccountId, buttonColor, buttonTextColor }: { connectedAccountId: string | undefined, buttonColor: string, buttonTextColor: string }) {
   const [donationType, setDonationType] = useState<"once" | "monthly">("once");
   const [donationAmount, setDonationAmount] = useState<number>(100);
   const [customAmount, setCustomAmount] = useState<number>();
@@ -34,29 +34,9 @@ export default function DonationForm({ nonprofitId, buttonColor, buttonTextColor
   const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>();
   const [clientSecret, setClientSecret] = useState();
   const TRANSACTION_FEE = 3.25;
-  const [connectedAccountId, setConnectedAccountId] = useState<string>();
   const supabase = createClient();
   const router = Router;
 
-  // SET connectedAccountId from DB
-  useEffect(() => {
-    const fetchConnectedAccountId = async () => {
-      const { data, error } = await supabase
-        .from("nonprofits")
-        .select("connected_account_id")
-        .eq("id", nonprofitId)
-        .single();
-
-      if (error) {
-        console.error("Error fetching connected account ID:", error);
-      } else {
-        setConnectedAccountId(data.connected_account_id);
-        console.log("Got Connected Account ID!", data.connected_account_id);
-      }
-    };
-
-    fetchConnectedAccountId();
-  }, [nonprofitId]);
 
   // CALCULATE DONATION AMOUNT
   useEffect(() => {
@@ -114,7 +94,7 @@ export default function DonationForm({ nonprofitId, buttonColor, buttonTextColor
           },
           body: JSON.stringify({
             amount: totalAmount,
-            nonprofitId,
+            connectedAccountId,
           }),
         });
 
@@ -239,7 +219,7 @@ export default function DonationForm({ nonprofitId, buttonColor, buttonTextColor
             options={stripeOptions}
           >
             <CheckoutForm
-              nonprofitId={nonprofitId}
+              connectedAccountId={connectedAccountId}
               setPaymentSuccess={setPaymentSuccess}
               totalAmount={totalAmount}
               onBack={handleBackClick}

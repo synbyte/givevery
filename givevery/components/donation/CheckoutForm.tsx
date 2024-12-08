@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "../ui/card";
 import StepIndicator from "./StepIndicator";
 
-const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess, nonprofitId }:{ totalAmount: number, setPaymentSuccess: any, nonprofitId: any, onBack: () => void }) => {
+const CheckoutForm = ({ totalAmount, onBack, setPaymentSuccess, connectedAccountId }:{ totalAmount: number, setPaymentSuccess: any, connectedAccountId: any, onBack: () => void }) => {
     const stripe = useStripe();
     const elements = useElements();
   

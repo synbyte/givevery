@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/server';
 export async function POST(request) {
 
   const { amount, connectedAccountId } = await request.json();
+  console.log(amount, connectedAccountId);
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
@@ -19,7 +20,7 @@ export async function POST(request) {
     });
     
 
-    console.log('payment succeeded!')
+    console.log('Payment Intent Created!')
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
