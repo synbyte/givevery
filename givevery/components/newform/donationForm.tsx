@@ -3,27 +3,30 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe, Stripe, StripeElementsOptions } from "@stripe/stripe-js";
 import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import CheckoutForm from "./checkoutForm";
 
-
 interface DonationFormProps {
   connectedAccountId: string;
 }
-
-type Step = 1 | 2 | 3;
+type Step = 1 | 1.5 |2 | 3;
 type Recurrence = "once" | "monthly";
-
 
 let stripePromise: Promise<Stripe | null>;
 
 export default function DonationForm({
   connectedAccountId,
 }: DonationFormProps) {
-
   const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>();
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [clientSecret, setClientSecret] = useState<string | undefined>();
@@ -35,14 +38,13 @@ export default function DonationForm({
   const [recurrence, setRecurrence] = useState<Recurrence>("once");
   const TRANSACTION_FEE = 3.25;
 
-
   const stripePromiseMemo = useMemo(() => {
     if (!connectedAccountId) {
       const error = new Error("No connected account ID provided");
       setError(error.message);
       throw error;
     }
-    
+
     stripePromise = loadStripe(
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "",
       {
@@ -57,7 +59,7 @@ export default function DonationForm({
       isSelected
         ? "bg-gradient-to-tr from-green-500 to-green-400 text-white font-bold hover:bg-green-600 ring-2 ring-offset-0 ring-green-900"
         : "bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-300"
-    } focus:outline-none transition-all duration-200 p-2 rounded-md border-green-500 border border-dashed`;
+    } focus:outline-none transition-all duration-500 p-2 rounded-md border-green-500 border border-dotted`;
   };
 
   const handleDonateClick = async () => {
@@ -78,22 +80,28 @@ export default function DonationForm({
       });
 
       if (!response.ok) {
-        throw new Error(`Payment intent creation failed: ${response.statusText}`);
+        throw new Error(
+          `Payment intent creation failed: ${response.statusText}`
+        );
       }
 
       const data = await response.json();
-      
+
       if (!data.clientSecret) {
         throw new Error("No client secret received from server");
       }
 
       setClientSecret(data.clientSecret);
-      setStep(2);
+      if (recurrence === "once") {
+        setStep(2);
+      } else {
+        setStep(1.5);
+      }
     } catch (error) {
       console.error("Error creating payment intent:", error);
       setError("Error creating payment intent");
     }
-  }
+  };
 
   const handleRecurrenceChange = (type: Recurrence) => {
     setRecurrence(type);
@@ -101,16 +109,25 @@ export default function DonationForm({
 
   const handleDonationAmountChange = (amount: number) => {
     setDonationAmount(amount);
-    setCustomAmount(undefined);
+    setCustomAmount(amount);
   };
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     setCustomAmount(isNaN(value) ? undefined : value);
+    setDonationAmount(value);
   };
 
+  const createCustomer = async () => {
+    const response = await fetch("/api/create-customer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ connectedAccountId }),
+    });
+  };
   useEffect(() => {
-    if (clientSecret) {  // Add this check
+    if (clientSecret) {
+      // Add this check
       setStripeOptions({
         clientSecret,
         appearance: {
@@ -134,8 +151,7 @@ export default function DonationForm({
 
   return (
     <Card className="mx-auto w-full max-w-md text-black bg-gradient-to-tl from-green-50 to-green-100">
-   
-        {step === 1 && (
+      {step === 1 && (
         <>
           <CardHeader>
             <CardTitle>Make a Donation</CardTitle>
@@ -143,8 +159,8 @@ export default function DonationForm({
               Monthly giving goes a long way to support our cause!
             </CardDescription>
           </CardHeader>
-          <CardContent>
-          <div className="flex mb-10 space-x-1 bg-gray-100">
+          <CardContent className="space-y-5">
+            <div className="flex mb-10 space-x-1 bg-gray-100">
               <button
                 onClick={() => handleRecurrenceChange("once")}
                 className={getButtonClass(recurrence === "once")}
@@ -153,7 +169,7 @@ export default function DonationForm({
               </button>
               <button
                 onClick={() => handleRecurrenceChange("monthly")}
-                className={getButtonClass(recurrence === "monthly")}
+                className={getButtonClass(recurrence === "monthly")}              
               >
                 Donate Monthly
               </button>
@@ -191,8 +207,8 @@ export default function DonationForm({
                 Cover transaction fees (${TRANSACTION_FEE.toFixed(2)})
               </Label>
             </div>
-            </CardContent>
-            <CardFooter>
+          </CardContent>
+          <CardFooter>
             <Button
               className="w-full bg-green-500 hover:bg-green-600 focus:ring-green-500"
               onClick={handleDonateClick}
@@ -200,21 +216,46 @@ export default function DonationForm({
               Donate ${totalAmount.toFixed(2)}{" "}
               {recurrence === "monthly" ? "Monthly" : ""}
             </Button>
-          {error && <p onClick={() => setError(undefined)} className="border border-red-500 bg-red-100 text-red-700 px-4 py-3 rounded inline-flex" role="alert">{error}</p>}
+            {error && (
+              <p
+                onClick={() => setError(undefined)}
+                className="border border-red-500 bg-red-100 text-red-700 px-4 py-3 rounded inline-flex"
+                role="alert"
+              >
+                {error}
+              </p>
+            )}
           </CardFooter>
-          </>
+        </>
+      )}
+      {step === 1.5 && (
+        <>
+          <CardHeader>
+            <CardTitle>Tell us about yourself</CardTitle>
+            <CardDescription>
+              We need to gather some information so we can customize your donation you can manage in later on.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <Input type="text" placeholder="First Name" />
+            <Input type="text" placeholder="Last Name" />
+            <Input type="email" placeholder="Email" />
+            <Button onClick={() => setStep(1)}>Back</Button>
+            <Button onClick={() => setStep(2)}>Next</Button>
+          </CardContent>
+        </>
       )}
       {step === 2 && (
         <>
-      {clientSecret && stripeOptions && (
-        <Elements
-          stripe={stripePromiseMemo}
-          options={stripeOptions}
-        >
-          <CheckoutForm />
-          </Elements>
-      )}
-      </>
+          {clientSecret && stripeOptions && (
+            <Elements
+              stripe={stripePromiseMemo}
+              options={stripeOptions}
+            >
+              <CheckoutForm />
+            </Elements>
+          )}
+        </>
       )}
     </Card>
   );

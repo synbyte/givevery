@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/utils/utils';
-import { createClient } from '@/utils/supabase/server';
 
 export async function POST(request) {
 
   const { amount, connectedAccountId } = await request.json();
-  console.log(amount, connectedAccountId);
+  console.log(`$${amount} donation to ${connectedAccountId}`);
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
