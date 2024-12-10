@@ -2,10 +2,10 @@ import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export default function CheckoutForm() {
+export default function CheckoutForm({onBack}: {onBack: () => void}) {
     const stripe = useStripe();
     const elements = useElements();
-   
+  
     const [error, setError] = useState<string | undefined>();
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -46,6 +46,7 @@ export default function CheckoutForm() {
             <Button type="submit" disabled={isLoading || isSuccess}>
                 {isLoading ? "Processing..." : isSuccess ? "Donation Successful!" : "Submit"}
             </Button>
+            <Button type="button" onClick={onBack}>Back</Button>
             {error && <p className="border border-red-500 bg-red-100 text-red-700 px-4 py-3 rounded inline-flex" role="alert">{error}</p>}
         </form>
     );

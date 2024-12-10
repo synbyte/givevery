@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import CheckoutForm from "./checkoutForm";
+import CustomerForm from "./customerForm";
 
 interface DonationFormProps {
   connectedAccountId: string;
@@ -118,13 +119,7 @@ export default function DonationForm({
     setDonationAmount(value);
   };
 
-  const createCustomer = async () => {
-    const response = await fetch("/api/create-customer", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ connectedAccountId }),
-    });
-  };
+  
   useEffect(() => {
     if (clientSecret) {
       // Add this check
@@ -229,30 +224,18 @@ export default function DonationForm({
         </>
       )}
       {step === 1.5 && (
-        <>
-          <CardHeader>
-            <CardTitle>Tell us about yourself</CardTitle>
-            <CardDescription>
-              We need to gather some information so we can customize your donation you can manage in later on.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <Input type="text" placeholder="First Name" />
-            <Input type="text" placeholder="Last Name" />
-            <Input type="email" placeholder="Email" />
-            <Button onClick={() => setStep(1)}>Back</Button>
-            <Button onClick={() => setStep(2)}>Next</Button>
-          </CardContent>
-        </>
+        
+        <CustomerForm amount={totalAmount.toFixed(2)} connectedAccountId={connectedAccountId} setClientSecret={setClientSecret} onBack={() => setStep(1)} onNext={() => setStep(2)} />
+        
       )}
       {step === 2 && (
         <>
-          {clientSecret && stripeOptions && (
-            <Elements
-              stripe={stripePromiseMemo}
-              options={stripeOptions}
-            >
-              <CheckoutForm />
+        {clientSecret && stripeOptions && (
+          <Elements
+            stripe={stripePromiseMemo}
+            options={stripeOptions}
+          >
+              <CheckoutForm onBack={() => setStep(1.5)}/>
             </Elements>
           )}
         </>
