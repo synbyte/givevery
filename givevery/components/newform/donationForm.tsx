@@ -225,7 +225,7 @@ export default function DonationForm({
       )}
       {step === 1.5 && (
         
-        <CustomerForm amount={totalAmount.toFixed(2)} connectedAccountId={connectedAccountId} setClientSecret={setClientSecret} onBack={() => setStep(1)} onNext={() => setStep(2)} />
+        <CustomerForm stripePromiseMemo={stripePromiseMemo}  amount={totalAmount.toFixed(2)} connectedAccountId={connectedAccountId} onBack={() => setStep(1)}  />
         
       )}
       {step === 2 && (

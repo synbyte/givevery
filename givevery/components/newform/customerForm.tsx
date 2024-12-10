@@ -10,6 +10,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { StripeElementsOptions } from "@stripe/stripe-js";
 import {
   CardDescription,
   CardHeader,
@@ -18,7 +19,9 @@ import {
 } from "../ui/card";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AddressElement } from "@stripe/react-stripe-js";
+import { AddressElement, Elements } from "@stripe/react-stripe-js";
+import CheckoutForm from "./checkoutForm";
+import { useEffect, useState } from "react";
 
 const customerSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
@@ -29,16 +32,22 @@ const customerSchema = z.object({
 export default function CustomerForm({
   connectedAccountId,
   onBack,
-  onNext,
-  setClientSecret,
-  amount,
+
+
+    amount,
+    stripePromiseMemo,
+   
 }: {
         connectedAccountId: string;
         amount: string;
   onBack: () => void;
-  onNext: () => void;
-  setClientSecret: (clientSecret: string) => void;
-}) {
+ 
+     
+        stripePromiseMemo: any;
+        
+    }) {
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>();
   const form = useForm<z.infer<typeof customerSchema>>({
     resolver: zodResolver(customerSchema),
     defaultValues: {
@@ -76,118 +85,141 @@ export default function CustomerForm({
       });
       const subscriptionData = await subscriptionResponse.json();
       setClientSecret(subscriptionData.latest_invoice.payment_intent.client_secret);
-      onNext();
 
   };
-
+useEffect(() => {
+    if (clientSecret) {
+        setStripeOptions({
+            clientSecret,
+            appearance: {
+              theme: "stripe",
+              variables: {
+                colorPrimary: "#00C220",
+                colorBackground: "#FFFFFF",
+              },
+            },
+          });
+    }
+}, [clientSecret]);
   return (
     <>
-      <CardHeader>
-        <CardTitle>Tell us about yourself</CardTitle>
-        <CardDescription>
-          We need to gather some information so we can customize your donation
-          you can manage in later on.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <Form {...form}>
-          <form
-            className="space-y-5"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
-            <div className="flex gap-2">
-              <FormField
-                control={form.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel className="uppercase tracking-wide text-xs">
-                      * First Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="text"
-                        placeholder="First Name"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel className="uppercase tracking-wide text-xs">
-                      *Last Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="text"
-                        placeholder="Last Name"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="uppercase tracking-wide text-xs">
-                    * Email
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder="Email"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* <FormItem>
-                        <FormLabel className="uppercase tracking-wide text-xs">* Billing Address</FormLabel>
-                        <AddressElement options={{
-                            mode: 'billing',
-                            allowedCountries: ['US'],
-                            fields: {
-                                phone: 'always',
-                            },
-                            validation: {
-                                phone: {
-                                    required: 'always',
+      {!stripeOptions ? (
+        <>
+          <CardHeader>
+            <CardTitle>Tell us about yourself</CardTitle>
+            <CardDescription>
+              We need to gather some information so we can customize your donation
+              you can manage in later on.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <Form {...form}>
+              <form
+                className="space-y-5"
+                onSubmit={form.handleSubmit(onSubmit)}
+              >
+                <div className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel className="uppercase tracking-wide text-xs">
+                          * First Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="text"
+                            placeholder="First Name"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel className="uppercase tracking-wide text-xs">
+                          *Last Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="text"
+                            placeholder="Last Name"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase tracking-wide text-xs">
+                        * Email
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="Email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* <FormItem>
+                            <FormLabel className="uppercase tracking-wide text-xs">* Billing Address</FormLabel>
+                            <AddressElement options={{
+                                mode: 'billing',
+                                allowedCountries: ['US'],
+                                fields: {
+                                    phone: 'always',
                                 },
-                            },
-                        }} />
-                    </FormItem> */}
-            <div className="flex justify-evenly gap-5 mt-4">
-              <Button
-                className="flex-1"
-                type="button"
-                onClick={onBack}
-              >
-                Back
-              </Button>
-              <Button
-                className="flex-1 bg-green-500 hover:bg-green-600 focus:ring-green-500"
-                type="submit"
-                onClick={form.handleSubmit(onSubmit)}
-              >
-                Next
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
+                                validation: {
+                                    phone: {
+                                        required: 'always',
+                                    },
+                                },
+                            }} />
+                        </FormItem> */}
+                <div className="flex justify-evenly gap-5 mt-4">
+                  <Button
+                    className="flex-1"
+                    type="button"
+                    onClick={onBack}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    className="flex-1 bg-green-500 hover:bg-green-600 focus:ring-green-500"
+                    type="submit"
+                    onClick={form.handleSubmit(onSubmit)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </>
+      ) : (
+        <Elements
+          stripe={stripePromiseMemo}
+          options={stripeOptions}
+        >
+          <CheckoutForm onBack={onBack} />
+        </Elements>
+      )}
     </>
   );
 }
