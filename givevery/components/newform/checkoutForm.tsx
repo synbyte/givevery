@@ -2,6 +2,7 @@ import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
+
 export default function CheckoutForm({onBack}: {onBack: () => void}) {
     const stripe = useStripe();
     const elements = useElements();
@@ -9,6 +10,7 @@ export default function CheckoutForm({onBack}: {onBack: () => void}) {
     const [error, setError] = useState<string | undefined>();
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -23,7 +25,7 @@ export default function CheckoutForm({onBack}: {onBack: () => void}) {
             elements,
             redirect: "if_required",
             confirmParams: {
-                return_url: "http://localhost:3000/success",
+                return_url: `${window.location.origin}/success`,
             },
         });
 
@@ -41,7 +43,7 @@ export default function CheckoutForm({onBack}: {onBack: () => void}) {
     }
     
     return (
-        <form onSubmit={handleSubmit}>
+        <form className="p-4" onSubmit={handleSubmit}>
             <PaymentElement />
             <Button type="submit" disabled={isLoading || isSuccess}>
                 {isLoading ? "Processing..." : isSuccess ? "Donation Successful!" : "Submit"}

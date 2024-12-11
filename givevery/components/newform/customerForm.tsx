@@ -40,7 +40,7 @@ export default function CustomerForm({
 }: {
         connectedAccountId: string;
         amount: string;
-  onBack: () => void;
+  onBack: (step: any) => void;
  
      
         stripePromiseMemo: any;
@@ -196,7 +196,7 @@ useEffect(() => {
                   <Button
                     className="flex-1"
                     type="button"
-                    onClick={onBack}
+                    onClick={() => onBack(1)}
                   >
                     Back
                   </Button>
@@ -217,7 +217,7 @@ useEffect(() => {
           stripe={stripePromiseMemo}
           options={stripeOptions}
         >
-          <CheckoutForm onBack={onBack} />
+          <CheckoutForm onBack={() => onBack(1)} />
         </Elements>
       )}
     </>

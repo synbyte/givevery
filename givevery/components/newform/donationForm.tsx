@@ -38,7 +38,7 @@ export default function DonationForm({
   const [step, setStep] = useState<Step>(1);
   const [recurrence, setRecurrence] = useState<Recurrence>("once");
   const TRANSACTION_FEE = 3.25;
-
+  // Memoized Stripe promise to avoid recreating on every render
   const stripePromiseMemo = useMemo(() => {
     if (!connectedAccountId) {
       const error = new Error("No connected account ID provided");
@@ -55,6 +55,7 @@ export default function DonationForm({
     return stripePromise;
   }, [connectedAccountId]);
 
+  // Helper function to generate button class names based on selection state
   const getButtonClass = (isSelected: boolean) => {
     return `flex-1 ${
       isSelected
@@ -63,6 +64,7 @@ export default function DonationForm({
     } focus:outline-none transition-all duration-500 p-2 rounded-md border-green-500 border border-dotted`;
   };
 
+  // Handle donation button click - creates payment intent and moves to next step
   const handleDonateClick = async () => {
     try {
       if (totalAmount <= 0) {
@@ -93,6 +95,7 @@ export default function DonationForm({
       }
 
       setClientSecret(data.clientSecret);
+      // Move to appropriate step based on recurrence type
       if (recurrence === "once") {
         setStep(2);
       } else {
@@ -104,25 +107,27 @@ export default function DonationForm({
     }
   };
 
+  // Update recurrence type (one-time vs monthly)
   const handleRecurrenceChange = (type: Recurrence) => {
     setRecurrence(type);
   };
 
+  // Handle preset donation amount selection
   const handleDonationAmountChange = (amount: number) => {
     setDonationAmount(amount);
     setCustomAmount(amount);
   };
 
+  // Handle custom donation amount input
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     setCustomAmount(isNaN(value) ? undefined : value);
     setDonationAmount(value);
   };
 
-  
+  // Set up Stripe Elements options when client secret is available
   useEffect(() => {
     if (clientSecret) {
-      // Add this check
       setStripeOptions({
         clientSecret,
         appearance: {
@@ -137,6 +142,7 @@ export default function DonationForm({
     }
   }, [clientSecret]);
 
+  // Calculate total amount including optional transaction fee
   useEffect(() => {
     const baseAmount = Number(customAmount) || donationAmount || 0;
     const fee = coverFees ? TRANSACTION_FEE : 0;
@@ -225,7 +231,7 @@ export default function DonationForm({
       )}
       {step === 1.5 && (
         
-        <CustomerForm stripePromiseMemo={stripePromiseMemo}  amount={totalAmount.toFixed(2)} connectedAccountId={connectedAccountId} onBack={() => setStep(1)}  />
+        <CustomerForm stripePromiseMemo={stripePromiseMemo}  amount={totalAmount.toFixed(2)} connectedAccountId={connectedAccountId} onBack={setStep}  />
         
       )}
       {step === 2 && (
@@ -235,7 +241,7 @@ export default function DonationForm({
             stripe={stripePromiseMemo}
             options={stripeOptions}
           >
-              <CheckoutForm onBack={() => setStep(1.5)}/>
+              <CheckoutForm onBack={() => setStep(1)}/>
             </Elements>
           )}
         </>

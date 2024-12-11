@@ -30,6 +30,7 @@ export async function POST(request) {
         payment_behavior: "default_incomplete",
         payment_settings: { save_default_payment_method: "on_subscription" },
         expand: ["latest_invoice.payment_intent"],
+        application_fee_percent:4,
       },
       {
         stripeAccount: body.connectedAccountId,

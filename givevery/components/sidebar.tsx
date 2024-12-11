@@ -13,7 +13,7 @@ const Sidebar = memo(function Sidebar() {
 
 
   return (
-    <aside className="flex fixed top-0 left-0 flex-col p-4 w-64 h-full bg-gradient-to-b from-white to-lime-50 border-r dark:from-transparent dark:to-black">
+    <aside className="flex fixed top-0 left-0 flex-col p-4 w-64 h-full bg-gradient-to-b from-white to-lime-50 border-r dark:from-transparent dark:to-black z-30">
       <div className="flex justify-start p-2">
         <Image className="mx-auto w-1/2 dark:bg-slate-300 p-1 rounded" width={808} height={523} alt="Givevery Logo"  src={logo}></Image>
         </div>

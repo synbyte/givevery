@@ -5,7 +5,9 @@ import { useStripeConnect } from '@/hooks/useStripeConnect'
 import { useNonprofit } from "@/app/NonprofitContext"
 import {
   ConnectPayments,
-  ConnectComponentsProvider
+  ConnectComponentsProvider,
+  ConnectNotificationBanner,
+  ConnectAccountManagement
 } from "@stripe/react-connect-js"
 
 
@@ -17,7 +19,6 @@ export default function Page() {
   const { nonprofitId, connectedAccountId } = useNonprofit();
   const stripeConnectInstance = useStripeConnect(connectedAccountId)
   const supabase = createClient()
-
 
   useEffect(() => {
     const fetchDonations = async (account:string) => {
@@ -62,7 +63,17 @@ export default function Page() {
       <div className="w-full">
         {connectedAccountId && stripeConnectInstance && (
           <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
+            <ConnectNotificationBanner
+              collectionOptions={{
+                fields: 'eventually_due',
+                futureRequirements: 'include',
+            }}/>
+            
             <ConnectPayments />
+            <ConnectAccountManagement
+            onLoadError={(e) => {
+              console.log(e.error)
+            }}/>
           </ConnectComponentsProvider>
         )}
       </div>

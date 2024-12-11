@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useNonprofit } from "../NonprofitContext";
 import { useRouter } from "next/navigation";
+import { NotificationCount } from "@stripe/connect-js";
 
 
 export default function ProtectedPage() {

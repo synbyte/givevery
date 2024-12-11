@@ -60,7 +60,7 @@ export default function RootLayout({
           ) : (
             <main className="min-h-screen flex flex-col items-center ">
               <div className="flex-1 w-full flex flex-col items-center">
-                <nav className="w-full flex justify-end h-16 border-b fixed bg-gradient-to-r from-white to-lime-50 dark:from-transparent dark:to-black">
+                <nav className="z-20 w-full flex justify-end h-16 border-b fixed bg-gradient-to-r from-white to-lime-50 dark:from-transparent dark:to-black">
                   <div className="w-full max-w-5xl flex justify-end p-3 px-5 text-sm">
                     {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
                   </div>
