@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useNonprofit } from "../NonprofitContext";
 import { useRouter } from "next/navigation";
-import { NotificationCount } from "@stripe/connect-js";
+import TotalOneTimeDonations from "@/components/totalOneTime"
 
 
 export default function ProtectedPage() {
@@ -27,6 +27,7 @@ export default function ProtectedPage() {
       <div className="w-full border-b">
         <p className="pb-3 text-3xl font-bold">Your Overview</p>
       </div>
+      <TotalOneTimeDonations connectedAccountId={connectedAccountId} />
       <p>Connected Account ID: {connectedAccountId}</p>
       <p>Nonprofit ID: {nonprofitId}</p>
     </div>

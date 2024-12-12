@@ -11,7 +11,6 @@ import {
 } from "@stripe/react-connect-js"
 
 
-
 export default function Page() {
   const [donations, setDonations] = useState()
   const [totalDonations, setTotalDonations] = useState<number>()
@@ -59,6 +58,7 @@ export default function Page() {
     <div className="flex flex-col flex-1 space-y-2 w-full">
       <div className="w-full border-b">
         <p className="pb-3 text-3xl font-bold">Transactions</p>
+        {totalDonations}
       </div>
       <div className="w-full">
         {connectedAccountId && stripeConnectInstance && (

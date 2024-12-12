@@ -8,12 +8,12 @@ export async function POST(request) {
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100, // amount in cents
+      amount: Math.round(amount * 100), // amount in cents
       currency: 'usd',
       automatic_payment_methods: {
         enabled: true,
       },
-      application_fee_amount: amount * 100 * 0.04,
+      application_fee_amount: Math.round(amount * 100 * 0.04),
     },{
       stripeAccount: connectedAccountId,
     });
@@ -22,6 +22,7 @@ export async function POST(request) {
     console.log('Payment Intent Created!')
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
+    console.log(error)
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
