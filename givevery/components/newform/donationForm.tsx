@@ -268,7 +268,7 @@ export default function DonationForm({
             stripe={stripePromiseMemo}
             options={stripeDefaultOptions}
             >
-              <ExpressCheckoutElement onConfirm={() => {console.log("Confirmed")}}/>
+                <ExpressCheckoutElement options={{ buttonType: { googlePay: "donate" } , paymentMethodOrder: ["googlePay","link"] }} onConfirm={() => {console.log("Confirmed")}}/>
             </Elements>
             )}
           </CardContent>
