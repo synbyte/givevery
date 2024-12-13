@@ -16,7 +16,13 @@ export async function POST(req) {
     });
 
     const subscriptions = paymentIntents.data
-    console.log(subscriptions)
+    .filter(subscription => subscription.status === 'active')
+    .map(subscription => ({
+      id: subscription.id,
+      amount: subscription.plan.amount / 100,
+      currency: subscription.plan.currency,
+      createdAt: new Date(subscription.created * 1000).toISOString(),
+    }));
     return NextResponse.json(subscriptions);
   } catch (error) {
     console.error('Error listing payment intents:', error.message);

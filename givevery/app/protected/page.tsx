@@ -2,12 +2,12 @@
 import { useEffect } from "react";
 import { useNonprofit } from "../NonprofitContext";
 import { useRouter } from "next/navigation";
-import TotalOneTimeDonations from "@/components/totalOneTime"
+import TotalDonations from "@/components/totalDonations"
+import { Suspense } from "react";
 
 
 export default function ProtectedPage() {
   const r = useRouter();
-
   const { nonprofitId, connectedAccountId } = useNonprofit();
 
   // If no profile or onboarding not completed, redirect to onboarding
@@ -27,7 +27,9 @@ export default function ProtectedPage() {
       <div className="w-full border-b">
         <p className="pb-3 text-3xl font-bold">Your Overview</p>
       </div>
-      <TotalOneTimeDonations connectedAccountId={connectedAccountId} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <TotalDonations connectedAccountId={connectedAccountId} />
+      </Suspense>
       <p>Connected Account ID: {connectedAccountId}</p>
       <p>Nonprofit ID: {nonprofitId}</p>
     </div>

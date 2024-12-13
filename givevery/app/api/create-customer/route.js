@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/utils/utils";
+import { createClient } from "@/utils/supabase/server";
 
 export async function POST(request) {
   try {
@@ -23,10 +24,22 @@ export async function POST(request) {
       stripeAccount: data.connectedAccountId,
     });
 
+    // Insert customer into Supabase
+    const supabase = createClient();
+    const { insert, error } = await supabase.from("donors").insert({
+      donor_id: customer.id,
+      email: data.email.trim().toLowerCase(),
+      name: `${data.firstName.trim()} ${data.lastName.trim()}`,
+    });
+    if (error) {
+      console.error("Error inserting customer into Supabase:", error);
+      return new Response("Failed to create customer", { status: 500 });
+    }
+
     return NextResponse.json({ customerId: customer.id });
 
   } catch (error) {
-    console.error("Customer creation error:", error);
+    console.error("Customer creation error:", error.message);
     return new Response(error.message, { status: 500 });
   }
 }

@@ -1,5 +1,5 @@
 "use client";
-import { Elements } from "@stripe/react-stripe-js";
+import { Elements, ExpressCheckoutElement } from "@stripe/react-stripe-js";
 import { loadStripe, Stripe, StripeElementsOptions } from "@stripe/stripe-js";
 import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -29,8 +29,10 @@ export default function DonationForm({
   connectedAccountId,
 }: DonationFormProps) {
   const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>();
+  const [stripeDefaultOptions, setStripeDefaultOptions] = useState<StripeElementsOptions>();
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [clientSecret, setClientSecret] = useState<string | undefined>();
+  const [clientSecretDefault, setClientSecretDefault] = useState<string | undefined>();
   const [donationAmount, setDonationAmount] = useState<number>(100);
   const [customAmount, setCustomAmount] = useState<number>();
   const [coverFees, setCoverFees] = useState(false);
@@ -125,6 +127,59 @@ export default function DonationForm({
     setDonationAmount(value);
   };
 
+  // Initialize Stripe with default amount on page load
+  useEffect(() => {
+    const initializeStripe = async () => {
+      try {
+        const response = await fetch("/api/create-payment-intent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: 100,
+            connectedAccountId,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Payment intent creation failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.clientSecret) {
+          throw new Error("No client secret received from server");
+        }
+
+        setClientSecretDefault(data.clientSecret);
+       
+
+      } catch (error) {
+        console.error("Error initializing Stripe:", error);
+        setError("Error initializing payment form");
+      }
+    };
+
+    initializeStripe();
+  }, [connectedAccountId]); 
+
+  useEffect(() => {
+    if (clientSecretDefault) {
+      setStripeDefaultOptions({
+        clientSecret: clientSecretDefault,
+        appearance: {
+          theme: "stripe",
+          variables: {
+            colorPrimary: "#00C220", 
+            colorBackground: "#FFFFFF",
+          },
+        },
+      });
+    }
+    console.log(stripeDefaultOptions)
+  }, [clientSecretDefault]);
+
   // Set up Stripe Elements options when client secret is available
   useEffect(() => {
     if (clientSecret) {
@@ -208,6 +263,14 @@ export default function DonationForm({
                 Cover transaction fees (${TRANSACTION_FEE.toFixed(2)})
               </Label>
             </div>
+            {clientSecretDefault && stripeDefaultOptions && recurrence === "once" && (
+            <Elements
+            stripe={stripePromiseMemo}
+            options={stripeDefaultOptions}
+            >
+              <ExpressCheckoutElement onConfirm={() => {console.log("Confirmed")}}/>
+            </Elements>
+            )}
           </CardContent>
           <CardFooter>
             <Button

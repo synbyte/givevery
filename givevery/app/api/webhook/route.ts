@@ -16,9 +16,8 @@ export async function POST(req:Request) {
             signature,
             process.env.STRIPE_WEBHOOK_SECRET as string
         )
-        console.log(body)
     } catch (error) {
-        return new NextResponse("Invalid Signature", {status: 400})
+        return new NextResponse("Webhook Error: "+ error, {status: 400})
     }
 
     const dataObject = event.data.object

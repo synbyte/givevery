@@ -1,4 +1,4 @@
-import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { PaymentElement, ExpressCheckoutElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -44,7 +44,7 @@ export default function CheckoutForm({onBack}: {onBack: () => void}) {
     
     return (
         <form className="p-4" onSubmit={handleSubmit}>
-            <PaymentElement />
+            <PaymentElement options={{layout:{type:"accordion",radios:false}}} />
             <Button type="submit" disabled={isLoading || isSuccess}>
                 {isLoading ? "Processing..." : isSuccess ? "Donation Successful!" : "Submit"}
             </Button>
