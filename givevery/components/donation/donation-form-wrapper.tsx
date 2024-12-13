@@ -47,9 +47,7 @@ export default function DonationFormWrapper() {
         </div>
       </div>
       <div className="flex-1 p-3 border">
-        <PreviewButton buttonColor={buttonColor} buttonTextColor={buttonTextColor} />
-        <DonationForm nonprofitId={nonprofitId} buttonColor={buttonColor} buttonTextColor={buttonTextColor} />
-      </div>
+    </div>
     </>
   );
 }
