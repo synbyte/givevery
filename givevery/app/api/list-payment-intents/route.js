@@ -16,13 +16,13 @@ export async function POST(req) {
 
     const paymentIntents = await stripe.paymentIntents.list(
       {
-        limit: 10000, // Adjust the limit as needed
+        limit: 100, // Adjust the limit as needed
       },
       {
         stripeAccount: connectedAccountId,
       }
     );
-
+    
     const donations = paymentIntents.data
       .filter((intent) => intent.status === "succeeded")
       .map((intent) => ({

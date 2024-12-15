@@ -1,25 +1,19 @@
-"use client";
-import { useEffect } from "react";
-import { useNonprofit } from "../NonprofitContext";
-import { useRouter } from "next/navigation";
-import TotalDonations from "@/components/totalDonations"
+import { redirect } from "next/navigation";
+import TotalDonations from "@/components/totalDonations";
 import { Suspense } from "react";
+import fetchNonprofitData from "./actions";
 
+// Server-side function to fetch nonprofit data
 
-export default function ProtectedPage() {
-  const r = useRouter();
-  const { nonprofitId, connectedAccountId } = useNonprofit();
+export default async function ProtectedPage() {
+  const data = await fetchNonprofitData();
+  const connectedAccountId = data?.connectedAccount?.connected_account_id;
+  const nonprofitId = data?.user?.id;
 
   // If no profile or onboarding not completed, redirect to onboarding
-  useEffect(() => {
-    if (!connectedAccountId) {
-      console.log("No connected account, redirecting to onboarding!")
-      r.push("/protected/onboarding");
-    }
-  }, [connectedAccountId, r])
-  
   if (!connectedAccountId) {
-      return null
+    console.log("No connected account, redirecting to onboarding!");
+    redirect("/protected/onboarding");
   }
 
   return (
