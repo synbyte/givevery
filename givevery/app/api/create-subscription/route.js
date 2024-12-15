@@ -4,23 +4,23 @@ import { stripe } from "@/utils/utils";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const {amount, connectedAccountId, customerId} = await request.json();
     
-    if (!body.amount || !body.connectedAccountId || !body.customerId) {
+    if (!amount || !connectedAccountId || !customerId) {
       return new Response("Missing required fields", { status: 400 });
     }
 
-    if (body.amount <= 0) {
+    if (amount <= 0) {
       return new Response("Amount must be greater than 0", { status: 400 }); 
     }
 
     const subscription = await stripe.subscriptions.create(
       {
-        customer: body.customerId,
+        customer: customerId,
         items: [
           {
             price_data: {
-              unit_amount: Math.round(body.amount * 100),
+              unit_amount: Math.round(amount * 100),
               currency: "usd", 
               product: "prod_RMfaDPUhhfH3eD",
               recurring: { interval: "month" },
@@ -30,10 +30,13 @@ export async function POST(request) {
         payment_behavior: "default_incomplete",
         payment_settings: { save_default_payment_method: "on_subscription" },
         expand: ["latest_invoice.payment_intent"],
-        application_fee_percent:4,
+        application_fee_percent: 4,
+        metadata: {
+          nonprofit: connectedAccountId,
+        },
       },
       {
-        stripeAccount: body.connectedAccountId,
+        stripeAccount: connectedAccountId,
       }
     );
 

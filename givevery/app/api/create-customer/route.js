@@ -24,17 +24,17 @@ export async function POST(request) {
       stripeAccount: data.connectedAccountId,
     });
 
-    // Insert customer into Supabase
-    const supabase = createClient();
-    const { insert, error } = await supabase.from("donors").insert({
-      donor_id: customer.id,
-      email: data.email.trim().toLowerCase(),
-      name: `${data.firstName.trim()} ${data.lastName.trim()}`,
-    });
-    if (error) {
-      console.error("Error inserting customer into Supabase:", error);
-      return new Response("Failed to create customer", { status: 500 });
-    }
+    // Insert customer into Supabase. Handled in webhook. 
+    // const supabase = createClient();
+    // const { insert, error } = await supabase.from("donors").insert({
+    //   donor_id: customer.id,
+    //   email: data.email.trim().toLowerCase(),
+    //   name: `${data.firstName.trim()} ${data.lastName.trim()}`,
+    // });
+    // if (error) {
+    //   console.error("Error inserting customer into Supabase:", error);
+    //   return new Response("Failed to create customer", { status: 500 });
+    // }
 
     return NextResponse.json({ customerId: customer.id });
 

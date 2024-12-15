@@ -14,6 +14,9 @@ export async function POST(request) {
         enabled: true,
       },
       application_fee_amount: Math.round(amount * 100 * 0.04),
+      metadata: {
+        nonprofit: connectedAccountId,
+      },
     },{
       stripeAccount: connectedAccountId,
     });
