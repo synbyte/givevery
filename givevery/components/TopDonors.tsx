@@ -1,5 +1,8 @@
+export const revalidate = 3600; // Revalidate every hour (3600 seconds)
+
 import { stripe } from '@/utils/utils';
 import type { Stripe } from 'stripe';
+
 interface Donor {
     customer: string;
     name: string;
