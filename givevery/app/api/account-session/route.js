@@ -21,6 +21,14 @@ export async function POST(req) {
               dispute_management: true,
               capture_payments: true,
             }
+          },
+          balances: {
+            enabled: true,
+            features: {
+              instant_payouts: true,
+              standard_payouts: true,
+              edit_payout_schedule: true,
+            }
           }
         }
       });

@@ -25,6 +25,10 @@ export async function POST(req: Request) {
   switch (event.type) {
     case "payment_intent.succeeded": {
       const paymentIntent = dataObject as Stripe.PaymentIntent;
+      if (paymentIntent.metadata.recurring === undefined) {
+        console.log("Skipping recurring payment in payment_intent.suceeded");
+        break;
+      }
 
       const paymentDetails = {
         id: paymentIntent.id,
@@ -32,8 +36,11 @@ export async function POST(req: Request) {
         currency: paymentIntent.currency,
         status: paymentIntent.status,
         created: paymentIntent.created,
+        paymentMethod: paymentIntent.payment_method,
         customer: paymentIntent.customer,
         nonprofit: paymentIntent.metadata.nonprofit,
+        recurring: paymentIntent.metadata.recurring,
+        metadata: paymentIntent.metadata,
       };
 
       const { error } = await supabase.from("donations").insert({
@@ -44,6 +51,8 @@ export async function POST(req: Request) {
         status: paymentDetails.status,
         created_at: new Date(paymentDetails.created * 1000).toISOString(),
         donor_id: paymentDetails.customer,
+        recurring: paymentDetails.recurring,
+        payment_method: paymentDetails.paymentMethod,
       });
 
       if (error) {
@@ -52,6 +61,43 @@ export async function POST(req: Request) {
       }
 
       console.log("WEBHOOK PAYMENT INTENT SUCCEEDED", paymentDetails);
+      break;
+    }
+
+    case "invoice.payment_succeeded": {
+      const invoice = dataObject as Stripe.Invoice;
+    
+          const connectedAccountId = invoice.subscription_details?.metadata?.nonprofit;
+
+          const paymentDetails = {
+        id: invoice.id,
+        amount: invoice.amount_paid,
+        currency: invoice.currency,
+        status: invoice.status,
+        created: new Date(invoice.created * 1000).toISOString(),
+        customer: invoice.customer,
+        nonprofit: invoice.subscription_details?.metadata?.nonprofit,
+        recurring: invoice.subscription_details?.metadata?.recurring,
+        metadata: invoice.metadata,
+          };
+          
+          const { error } = await supabase.from("donations").insert({
+            stripe_pid: paymentDetails.id,
+            amount: paymentDetails.amount,
+            nonprofit_id: paymentDetails.nonprofit,
+            currency: paymentDetails.currency,
+            status: paymentDetails.status,
+            created_at: paymentDetails.created,
+            donor_id: paymentDetails.customer,
+            recurring: paymentDetails.recurring,
+          });
+    
+          if (error) {
+            console.error("Error inserting donation into Supabase:", error);
+            return new NextResponse("Failed to create donation", { status: 500 });
+          }
+
+      console.log("WEBHOOK INVOICE PAYMENT SUCCEEDED", paymentDetails);
       break;
     }
 

@@ -5,6 +5,7 @@ import { useStripeConnect } from '@/hooks/useStripeConnect'
 import { useNonprofit } from "@/app/NonprofitContext"
 import {
   ConnectPayments,
+  ConnectBalances,
   ConnectComponentsProvider,
   ConnectNotificationBanner,
   ConnectAccountManagement
@@ -34,6 +35,7 @@ export default function Page() {
             }}/>
             
             <ConnectPayments />
+          <ConnectBalances/>
             <ConnectAccountManagement
             onLoadError={(e) => {
               console.log(e.error)

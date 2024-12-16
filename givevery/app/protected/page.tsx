@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import TotalDonations from "@/components/totalDonations";
+import Balance from "@/components/balance";
 import { Suspense } from "react";
 import fetchNonprofitData from "./actions";
 

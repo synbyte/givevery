@@ -16,6 +16,7 @@ export async function POST(request) {
       application_fee_amount: Math.round(amount * 100 * 0.04),
       metadata: {
         nonprofit: connectedAccountId,
+        recurring: "false"
       },
     },{
       stripeAccount: connectedAccountId,

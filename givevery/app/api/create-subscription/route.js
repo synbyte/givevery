@@ -33,7 +33,7 @@ export async function POST(request) {
         application_fee_percent: 4,
         metadata: {
           nonprofit: connectedAccountId,
-          recurring: true,
+          recurring: "true",
         },
       },
       {

@@ -171,10 +171,16 @@ export default function TotalDonations({ connectedAccountId }: Props) {
 
       {/* Average donation section */}
       <div className="flex flex-col">
-        <p className="text-sm font-bold text-lime-600">Average Donation</p>
+        <div className="flex items-center gap-1">
+          <p className="text-sm font-bold text-lime-600">Average Donation</p>
+          <div className="relative">
+            <span className="text-gray-400 text-xs cursor-help border rounded-full px-1" title="This is the average amount recieved per donation.">?</span>
+          </div>
+        </div>
         <p className="text-3xl font-bold">
           {averageDonation === undefined ? "-" : `$${averageDonation}`}
         </p>
+        <p className="text-xs font-bold text-gray-400">&nbsp;</p>
       </div>
 
       {/* Recurring subscriptions section */}
@@ -185,7 +191,6 @@ export default function TotalDonations({ connectedAccountId }: Props) {
             <span className="text-gray-400 text-xs cursor-help border rounded-full px-1" title="This is the amount recieved every month.">?</span>
           </div>
         </div>
-        
         <p className="text-3xl font-bold">
           {totalSubscriptions === undefined ? "-" : `$${totalSubscriptions}`}
         </p>
