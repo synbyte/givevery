@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { stripe } from "@/utils/utils";
 
 export default async function fetchNonprofitData() {
   const supabase = createClient();

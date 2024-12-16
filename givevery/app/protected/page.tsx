@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import TotalDonations from "@/components/totalDonations";
-import Balance from "@/components/balance";
+import DonationLineChart from "@/components/donationLineChart";
 import { Suspense } from "react";
 import fetchNonprofitData from "./actions";
+import TopDonors from "@/components/TopDonors";
 
 // Server-side function to fetch nonprofit data
 
@@ -24,6 +25,14 @@ export default async function ProtectedPage() {
       </div>
       <Suspense fallback={<div>Loading...</div>}>
         <TotalDonations connectedAccountId={connectedAccountId} />
+      </Suspense>
+      <DonationLineChart connectedAccountId={connectedAccountId} />
+      <Suspense fallback={
+        <div className="flex justify-center items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-lime-600"></div>
+        </div>
+      }>
+        <TopDonors connectedAccountId={connectedAccountId} />
       </Suspense>
       <p>Connected Account ID: {connectedAccountId}</p>
       <p>Nonprofit ID: {nonprofitId}</p>

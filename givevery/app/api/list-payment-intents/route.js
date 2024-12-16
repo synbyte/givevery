@@ -32,7 +32,6 @@ export async function POST(req) {
         createdAt: new Date(intent.created * 1000).toISOString(),
         metadata: intent.metadata,
         recurring: intent.metadata.subscription_id ? true : false,
-        x: intent.subscription_id,
       }));
 
     return NextResponse.json(donations);

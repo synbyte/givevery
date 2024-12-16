@@ -1,154 +1,123 @@
-"use client";
-import { useEffect, useState } from "react";
+import { stripe } from "@/utils/utils";
+import type { Stripe } from "stripe";
 
 // Props type definition for the component
 type Props = {
   connectedAccountId: string | undefined;
 };
 
-export default function TotalDonations({ connectedAccountId }: Props) {
-  // State for one-time donations
-  const [donations, setDonations] = useState<any[]>([]);
-  const [numOfDonations, setNumOfDonations] = useState<number>();
-  const [totalDonations, setTotalDonations] = useState<number>();
-  const [averageDonation, setAverageDonation] = useState<number>();
+type DonationStats = {
+  donations: Array<{amount: number}>;
+  numOfDonations: number;
+  totalDonations: number;
+  averageDonation: number;
+}
 
-  // State for recurring subscriptions  
-  const [subscriptions, setSubscriptions] = useState<any[]>([]);
-  const [numOfSubscriptions, setNumOfSubscriptions] = useState<number>();
-  const [totalSubscriptions, setTotalSubscriptions] = useState<number>();
-  const [averageSubscription, setAverageSubscription] = useState<number>();
+type SubscriptionStats = {
+  subscriptions: Array<{amount: number}>;
+  numOfSubscriptions: number;
+  totalSubscriptions: number;
+  averageSubscription: number;
+}
 
-  // Effect hook to fetch one-time donations
-  useEffect(() => {
-    let isMounted = true;
-    const fetchDonations = async (account: string) => {
-      let allDonations: any[] = [];
-      let hasMore = true;
-      let startingAfter = undefined;
-    
-      // Fetch donations in batches until no more are available
-      while (hasMore && isMounted) {
-        const response: Response = await fetch("/api/list-charges", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            connectedAccountId: account,
-            startingAfter,
-          }),
-        });
-        const data = await response.json();
-        
-        // Validate response data format
-        if (!data.donations || !Array.isArray(data.donations)) {
-          console.error("Invalid data format:", data);
-          break;
-        }
-    
-        allDonations = [...allDonations, ...data.donations];
-        hasMore = data.hasMore;
-        startingAfter = data.lastId;
+async function fetchDonations(account: string): Promise<DonationStats> {
+  let allDonations: Array<{amount: number}> = [];
+  let hasMore = true;
+  let startingAfter: string | undefined = undefined;
+
+  // Fetch donations in batches until no more are available
+  while (hasMore) {
+    const charges: Stripe.Response<Stripe.ApiList<Stripe.Charge>> = await stripe.charges.list(
+      {
+        limit: 100,
+        starting_after: startingAfter,
+        // status is valid per Stripe API docs even if TypeScript doesn't recognize it
+        // @ts-ignore
+        status: 'succeeded' as any,
+      },
+      {
+        stripeAccount: account,
       }
-    
-      // Don't update state if component unmounted
-      if (!isMounted) return;
-    
-      // Calculate total donation amount
-      const total = allDonations.reduce(
-        (sum: number, donation: { amount: number }) => sum + donation.amount,
-        0
-      );
-    
-      // Update donation-related state
-      setDonations(allDonations);
-      setNumOfDonations(allDonations.length);
-      setTotalDonations(total);
-      setAverageDonation(Number((total / allDonations.length || 0).toFixed(2)));
-    };
+    );
 
-    if (connectedAccountId !== undefined) {
-      fetchDonations(connectedAccountId);
+    const donations = charges.data.map((charge: Stripe.Charge) => ({
+      amount: charge.amount / 100,
+    }));
+
+    allDonations = [...allDonations, ...donations];
+    hasMore = charges.has_more;
+    if (hasMore && charges.data.length > 0) {
+      startingAfter = charges.data[charges.data.length - 1].id;
     }
+  }
 
-    // Cleanup function to prevent state updates after unmount
-    return () => {
-      isMounted = false;
-    };
-  }, [connectedAccountId]);
+  const total = allDonations.reduce(
+    (sum: number, donation: { amount: number }) => sum + donation.amount,
+    0
+  );
 
-  // Effect hook to fetch recurring subscriptions
-  useEffect(() => {
-    let isMounted = true;
-    const fetchSubscriptions = async (account: string) => {
-      let allSubscriptions: any[] = [];
-      let hasMore = true;
-      let startingAfter = undefined;
-  
-      // Fetch subscriptions in batches until no more are available
-      while (hasMore && isMounted) {
-        const response: Response = await fetch("/api/list-subscriptions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            connectedAccountId: account,
-            startingAfter,
-          }),
-        });
-        
-        const data = await response.json();
-        
-        // Validate response data format
-        if (!data.subscriptions || !Array.isArray(data.subscriptions)) {
-          console.error("Invalid subscription data format:", data);
-          break;
-        }
-  
-        allSubscriptions = [...allSubscriptions, ...data.subscriptions];
-        hasMore = data.hasMore;
-        startingAfter = data.lastId;
+  return {
+    donations: allDonations,
+    numOfDonations: allDonations.length,
+    totalDonations: total,
+    averageDonation: Number((total / allDonations.length || 0).toFixed(2))
+  };
+}
+
+async function fetchSubscriptions(account: string): Promise<SubscriptionStats> {
+  let allSubscriptions: Array<{amount: number}> = [];
+  let hasMore = true;
+  let startingAfter: string | undefined = undefined;
+
+  // Fetch subscriptions in batches until no more are available
+  while (hasMore) {
+    const subscriptions: Stripe.Response<Stripe.ApiList<Stripe.Subscription>> = await stripe.subscriptions.list(
+      {
+        limit: 100,
+        starting_after: startingAfter,
+        status: 'active',
+      },
+      {
+        stripeAccount: account,
       }
-  
-      // Don't update state if component unmounted
-      if (!isMounted) return;
-  
-      // Calculate total subscription amount
-      const total = allSubscriptions.reduce(
-        (sum: number, subscription: { amount: number }) => sum + subscription.amount,
-        0
-      );
-  
-      // Update subscription-related state
-      setSubscriptions(allSubscriptions);
-      setNumOfSubscriptions(allSubscriptions.length);
-      setTotalSubscriptions(total);
-      setAverageSubscription(Number((total / allSubscriptions.length || 0).toFixed(2)));
-    };
-  
-    if (connectedAccountId !== undefined) {
-      fetchSubscriptions(connectedAccountId);
-    }
-  
-    // Cleanup function to prevent state updates after unmount
-    return () => {
-      isMounted = false;
-    };
-  }, [connectedAccountId]);
- 
+    );
 
-  // Show loading state while data is being fetched
-  if (!totalDonations || !totalSubscriptions) {
+    const subscriptionData = subscriptions.data.map((sub: Stripe.Subscription) => ({
+      amount: sub.items.data[0].price.unit_amount ? sub.items.data[0].price.unit_amount / 100 : 0,
+    }));
+
+    allSubscriptions = [...allSubscriptions, ...subscriptionData];
+    hasMore = subscriptions.has_more;
+    if (hasMore && subscriptions.data.length > 0) {
+      startingAfter = subscriptions.data[subscriptions.data.length - 1].id;
+    }
+  }
+
+  const total = allSubscriptions.reduce(
+    (sum: number, subscription: { amount: number }) => sum + subscription.amount,
+    0
+  );
+
+  return {
+    subscriptions: allSubscriptions,
+    numOfSubscriptions: allSubscriptions.length,
+    totalSubscriptions: total,
+    averageSubscription: Number((total / allSubscriptions.length || 0).toFixed(2))
+  };
+}
+
+export default async function TotalDonations({ connectedAccountId }: Props) {
+  if (!connectedAccountId) {
     return (
-      <div className="text-xl animate-bounce text-center font-bold">
-        <p>Loading...</p>
+      <div className="text-xl text-center font-bold">
+        <p>No connected account found</p>
       </div>
     );
   }
 
-  // Render donation statistics
+  const donationStats = await fetchDonations(connectedAccountId);
+  const subscriptionStats = await fetchSubscriptions(connectedAccountId);
+
   return (
     <div className="flex gap-10">
       {/* One-time donations section */}
@@ -160,12 +129,10 @@ export default function TotalDonations({ connectedAccountId }: Props) {
           </div>
         </div>
         <p className="text-3xl font-bold">
-          {totalDonations === undefined ? "-" : `$${totalDonations}`}
+          ${donationStats.totalDonations}
         </p>
         <p className="text-xs font-bold text-gray-400">
-          {numOfDonations === undefined
-            ? "-"
-            : `${numOfDonations} single donations`}
+          {donationStats.numOfDonations} single donations
         </p>
       </div>
 
@@ -178,7 +145,7 @@ export default function TotalDonations({ connectedAccountId }: Props) {
           </div>
         </div>
         <p className="text-3xl font-bold">
-          {averageDonation === undefined ? "-" : `$${averageDonation}`}
+          ${donationStats.averageDonation}
         </p>
         <p className="text-xs font-bold text-gray-400">&nbsp;</p>
       </div>
@@ -192,12 +159,10 @@ export default function TotalDonations({ connectedAccountId }: Props) {
           </div>
         </div>
         <p className="text-3xl font-bold">
-          {totalSubscriptions === undefined ? "-" : `$${totalSubscriptions}`}
+          ${subscriptionStats.totalSubscriptions}
         </p>
         <p className="text-xs font-bold text-gray-400">
-          {numOfSubscriptions === undefined
-            ? "-"
-            : `${numOfSubscriptions} recurring monthly`}
+          {subscriptionStats.numOfSubscriptions} recurring monthly
         </p>
       </div>
     </div>
