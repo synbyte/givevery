@@ -1,5 +1,6 @@
 import React from 'react'
 import DonationForm from '@/components/newform/donationForm'
+import Test from '@/components/newform/test'
 
 type Props = {
   params: {
@@ -9,6 +10,8 @@ type Props = {
 
 export default function page({ params }: Props) {
   return (
-    <div className="max-w-md "><DonationForm connectedAccountId={params.connectedAccountId}/></div>
+    <div className="max-w-md ">
+    <DonationForm connectedAccountId={params.connectedAccountId} />
+    </div>
   )
 }

@@ -110,19 +110,19 @@ export default function DonationForm({ connectedAccountId }: DonationFormProps) 
     setDonationAmount(value);
   };
 
-  // useEffect(() => {
-  //   const initializeStripe = async () => {
-  //     try {
-  //       const secret = await createPaymentIntent(INITIAL_DONATION_AMOUNT);
-  //       setClientSecretDefault(secret);
-  //     } catch (error) {
-  //       console.error("Error initializing Stripe:", error);
-  //       setError("Error initializing payment form");
-  //     }
-  //   };
+  useEffect(() => {
+    const initializeStripe = async () => {
+      try {
+        const secret = await createPaymentIntent(INITIAL_DONATION_AMOUNT);
+        setClientSecretDefault(secret);
+      } catch (error) {
+        console.error("Error initializing Stripe:", error);
+        setError("Error initializing payment form");
+      }
+    };
 
-  //   initializeStripe();
-  // }, [connectedAccountId]);
+    initializeStripe();
+  }, [connectedAccountId]);
 
   useEffect(() => {
     if (clientSecretDefault) {
