@@ -9,6 +9,6 @@ type Props = {
 
 export default function page({ params }: Props) {
   return (
-    <div><DonationForm connectedAccountId={params.connectedAccountId}/></div>
+    <div className="max-w-md "><DonationForm connectedAccountId={params.connectedAccountId}/></div>
   )
 }

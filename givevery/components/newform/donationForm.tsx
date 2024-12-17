@@ -20,27 +20,35 @@ import CustomerForm from "./customerForm";
 interface DonationFormProps {
   connectedAccountId: string;
 }
-type Step = 1 | 1.5 |2 | 3;
+
+type Step = 1 | 1.5 | 2 | 3;
 type Recurrence = "once" | "monthly";
 
-let stripePromise: Promise<Stripe | null>;
+const DONATION_AMOUNTS = [50, 100, 150];
+const TRANSACTION_FEE = 3.25;
+const INITIAL_DONATION_AMOUNT = 100;
 
-export default function DonationForm({
-  connectedAccountId,
-}: DonationFormProps) {
+const DEFAULT_STRIPE_APPEARANCE = {
+  theme: "stripe",
+  variables: {
+    colorPrimary: "#00C220",
+    colorBackground: "#FFFFFF",
+  },
+} as const;
+
+export default function DonationForm({ connectedAccountId }: DonationFormProps) {
   const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>();
   const [stripeDefaultOptions, setStripeDefaultOptions] = useState<StripeElementsOptions>();
   const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [clientSecret, setClientSecret] = useState<string | undefined>();
-  const [clientSecretDefault, setClientSecretDefault] = useState<string | undefined>();
-  const [donationAmount, setDonationAmount] = useState<number>(100);
+  const [clientSecret, setClientSecret] = useState<string>();
+  const [clientSecretDefault, setClientSecretDefault] = useState<string>();
+  const [donationAmount, setDonationAmount] = useState<number>(INITIAL_DONATION_AMOUNT);
   const [customAmount, setCustomAmount] = useState<number>();
   const [coverFees, setCoverFees] = useState(false);
-  const [error, setError] = useState<string | undefined>();
+  const [error, setError] = useState<string>();
   const [step, setStep] = useState<Step>(1);
   const [recurrence, setRecurrence] = useState<Recurrence>("once");
-  const TRANSACTION_FEE = 3.25;
-  // Memoized Stripe promise to avoid recreating on every render
+
   const stripePromiseMemo = useMemo(() => {
     if (!connectedAccountId) {
       const error = new Error("No connected account ID provided");
@@ -48,16 +56,11 @@ export default function DonationForm({
       throw error;
     }
 
-    stripePromise = loadStripe(
-      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "",
-      {
-        stripeAccount: connectedAccountId,
-      }
-    );
-    return stripePromise;
+    return loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "", {
+      stripeAccount: connectedAccountId,
+    });
   }, [connectedAccountId]);
 
-  // Helper function to generate button class names based on selection state
   const getButtonClass = (isSelected: boolean) => {
     return `flex-1 ${
       isSelected
@@ -66,147 +69,87 @@ export default function DonationForm({
     } focus:outline-none transition-all duration-500 p-2 rounded-md border-green-500 border border-dotted`;
   };
 
-  // Handle donation button click - creates payment intent and moves to next step
+  const createPaymentIntent = async (amount: number) => {
+    const response = await fetch("/api/create-payment-intent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount, connectedAccountId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Payment intent creation failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    if (!data.clientSecret) {
+      throw new Error("No client secret received from server");
+    }
+
+    return data.clientSecret;
+  };
+
   const handleDonateClick = async () => {
     try {
       if (totalAmount <= 0) {
         throw new Error("Amount must be greater than 0");
       }
 
-      const response = await fetch("/api/create-payment-intent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: totalAmount,
-          connectedAccountId,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Payment intent creation failed: ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-
-      if (!data.clientSecret) {
-        throw new Error("No client secret received from server");
-      }
-
-      setClientSecret(data.clientSecret);
-      // Move to appropriate step based on recurrence type
-      if (recurrence === "once") {
-        setStep(2);
-      } else {
-        setStep(1.5);
-      }
+      const secret = await createPaymentIntent(totalAmount);
+      setClientSecret(secret);
+      setStep(recurrence === "once" ? 2 : 1.5);
     } catch (error) {
       console.error("Error creating payment intent:", error);
       setError("Error creating payment intent");
     }
   };
 
-  // Update recurrence type (one-time vs monthly)
-  const handleRecurrenceChange = (type: Recurrence) => {
-    setRecurrence(type);
-  };
-
-  // Handle preset donation amount selection
-  const handleDonationAmountChange = (amount: number) => {
-    setDonationAmount(amount);
-    setCustomAmount(amount);
-  };
-
-  // Handle custom donation amount input
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
-    setCustomAmount(isNaN(value) ? undefined : value);
+    const validValue = isNaN(value) ? undefined : value;
+    setCustomAmount(validValue);
     setDonationAmount(value);
   };
 
-  // Initialize Stripe with default amount on page load
-  useEffect(() => {
-    const initializeStripe = async () => {
-      try {
-        const response = await fetch("/api/create-payment-intent", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            amount: 100,
-            connectedAccountId,
-          }),
-        });
+  // useEffect(() => {
+  //   const initializeStripe = async () => {
+  //     try {
+  //       const secret = await createPaymentIntent(INITIAL_DONATION_AMOUNT);
+  //       setClientSecretDefault(secret);
+  //     } catch (error) {
+  //       console.error("Error initializing Stripe:", error);
+  //       setError("Error initializing payment form");
+  //     }
+  //   };
 
-        if (!response.ok) {
-          throw new Error(`Payment intent creation failed: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        if (!data.clientSecret) {
-          throw new Error("No client secret received from server");
-        }
-
-        setClientSecretDefault(data.clientSecret);
-       
-
-      } catch (error) {
-        console.error("Error initializing Stripe:", error);
-        setError("Error initializing payment form");
-      }
-    };
-
-    initializeStripe();
-  }, [connectedAccountId]); 
+  //   initializeStripe();
+  // }, [connectedAccountId]);
 
   useEffect(() => {
     if (clientSecretDefault) {
       setStripeDefaultOptions({
         clientSecret: clientSecretDefault,
-        appearance: {
-          theme: "stripe",
-          variables: {
-            colorPrimary: "#00C220", 
-            colorBackground: "#FFFFFF",
-          },
-        },
+        appearance: DEFAULT_STRIPE_APPEARANCE,
       });
     }
-    console.log(stripeDefaultOptions)
   }, [clientSecretDefault]);
 
-  // Set up Stripe Elements options when client secret is available
   useEffect(() => {
     if (clientSecret) {
       setStripeOptions({
         clientSecret,
-        appearance: {
-          theme: "stripe",
-          variables: {
-            colorPrimary: "#00C220",
-            colorBackground: "#FFFFFF",
-          },
-        },
+        appearance: DEFAULT_STRIPE_APPEARANCE,
       });
-      console.log("Stripe Options set with client secret!");
     }
   }, [clientSecret]);
 
-  // Calculate total amount including optional transaction fee
   useEffect(() => {
     const baseAmount = Number(customAmount) || donationAmount || 0;
     const fee = coverFees ? TRANSACTION_FEE : 0;
-    const newTotalAmount = baseAmount + fee;
-    setTotalAmount(newTotalAmount);
+    setTotalAmount(baseAmount + fee);
   }, [customAmount, donationAmount, coverFees]);
 
   return (
-    <Card className="mx-auto w-full max-w-md text-black bg-gradient-to-tl from-green-50 to-green-100">
+    <Card className="mx-auto max-w-md text-black bg-gradient-to-tl from-green-50 to-green-100">
       {step === 1 && (
         <>
           <CardHeader>
@@ -218,23 +161,26 @@ export default function DonationForm({
           <CardContent className="space-y-5">
             <div className="flex mb-10 space-x-1 bg-gray-100">
               <button
-                onClick={() => handleRecurrenceChange("once")}
+                onClick={() => setRecurrence("once")}
                 className={getButtonClass(recurrence === "once")}
               >
                 Donate Once
               </button>
               <button
-                onClick={() => handleRecurrenceChange("monthly")}
+                onClick={() => setRecurrence("monthly")}
                 className={getButtonClass(recurrence === "monthly")}              
               >
                 Donate Monthly
               </button>
             </div>
             <div className="flex space-x-4">
-              {[50, 100, 150].map((amount) => (
+              {DONATION_AMOUNTS.map((amount) => (
                 <button
                   key={amount}
-                  onClick={() => handleDonationAmountChange(amount)}
+                  onClick={() => {
+                    setDonationAmount(amount);
+                    setCustomAmount(amount);
+                  }}
                   className={getButtonClass(donationAmount === amount)}
                 >
                   ${amount}
@@ -264,12 +210,15 @@ export default function DonationForm({
               </Label>
             </div>
             {clientSecretDefault && stripeDefaultOptions && recurrence === "once" && (
-            <Elements
-            stripe={stripePromiseMemo}
-            options={stripeDefaultOptions}
-            >
-                <ExpressCheckoutElement options={{ buttonType: { googlePay: "donate" } , paymentMethodOrder: ["googlePay","link"] }} onConfirm={() => {console.log("Confirmed")}}/>
-            </Elements>
+              <Elements stripe={stripePromiseMemo} options={stripeDefaultOptions}>
+                <ExpressCheckoutElement 
+                  options={{ 
+                    buttonType: { googlePay: "donate" },
+                    paymentMethodOrder: ["googlePay", "link"]
+                  }} 
+                  onConfirm={() => console.log("Confirmed")}
+                />
+              </Elements>
             )}
           </CardContent>
           <CardFooter>
@@ -277,8 +226,7 @@ export default function DonationForm({
               className="w-full bg-green-500 hover:bg-green-600 focus:ring-green-500"
               onClick={handleDonateClick}
             >
-              Donate ${totalAmount.toFixed(2)}{" "}
-              {recurrence === "monthly" ? "Monthly" : ""}
+              Donate ${totalAmount.toFixed(2)}{recurrence === "monthly" ? " Monthly" : ""}
             </Button>
             {error && (
               <p
@@ -293,21 +241,17 @@ export default function DonationForm({
         </>
       )}
       {step === 1.5 && (
-        
-        <CustomerForm stripePromiseMemo={stripePromiseMemo}  amount={totalAmount.toFixed(2)} connectedAccountId={connectedAccountId} onBack={setStep}  />
-        
+        <CustomerForm 
+          stripePromiseMemo={stripePromiseMemo}
+          amount={totalAmount.toFixed(2)} 
+          connectedAccountId={connectedAccountId} 
+          onBack={setStep}
+        />
       )}
-      {step === 2 && (
-        <>
-        {clientSecret && stripeOptions && (
-          <Elements
-            stripe={stripePromiseMemo}
-            options={stripeOptions}
-          >
-              <CheckoutForm onBack={() => setStep(1)}/>
-            </Elements>
-          )}
-        </>
+      {step === 2 && clientSecret && stripeOptions && (
+        <Elements stripe={stripePromiseMemo} options={stripeOptions}>
+          <CheckoutForm onBack={() => setStep(1)}/>
+        </Elements>
       )}
     </Card>
   );
