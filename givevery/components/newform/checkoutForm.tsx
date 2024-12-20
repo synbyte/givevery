@@ -73,6 +73,7 @@ export default function CheckoutForm({onBack, amount,connectedAccountId}: {onBac
     
     return (
         <form className="p-4" onSubmit={handleSubmit}>
+            {amount}
             <PaymentElement options={{layout:{type:"accordion",radios:false}}} />
             <Button type="submit" disabled={isLoading || isSuccess}>
                 {isLoading ? "Processing..." : isSuccess ? "Donation Successful!" : "Submit"}

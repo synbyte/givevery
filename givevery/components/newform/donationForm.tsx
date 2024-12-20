@@ -25,8 +25,13 @@ type Step = 1 | 1.5 | 2 | 3;
 type Recurrence = "once" | "monthly";
 
 const DONATION_AMOUNTS = [50, 100, 150];
-const TRANSACTION_FEE = 3.25;
+const TRANSACTION_FEE = 0.029;
+const fee = (amount: number) => {
+  return amount * TRANSACTION_FEE + 0.30;
+}
 const INITIAL_DONATION_AMOUNT = 100;
+
+
 
 const DEFAULT_STRIPE_APPEARANCE = {
   theme: "stripe",
@@ -119,8 +124,8 @@ export default function DonationForm({ connectedAccountId }: DonationFormProps) 
 
   useEffect(() => {
     const baseAmount = Number(customAmount) || donationAmount || 0;
-    const fee = coverFees ? TRANSACTION_FEE : 0;
-    setTotalAmount(baseAmount + fee);
+    const txFee = coverFees ? fee(baseAmount) : 0;
+    setTotalAmount(baseAmount + txFee);
   }, [customAmount, donationAmount, coverFees]);
 
   return (
@@ -181,7 +186,7 @@ export default function DonationForm({ connectedAccountId }: DonationFormProps) 
                 className="ring-1 ring-green-500"
               />
               <Label htmlFor="cover-fees">
-                Cover transaction fees (${TRANSACTION_FEE.toFixed(2)})
+                Cover transaction fees (${fee(donationAmount || customAmount || 0).toFixed(2)})
               </Label>
             </div>
             {recurrence === "once" && (
