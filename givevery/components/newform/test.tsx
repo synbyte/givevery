@@ -9,29 +9,12 @@ type Props = {
 }
 
 function Test({ connectedAccountId }: Props) {
-    const [amount, setAmount] = useState(1000);
+    const [amount, setAmount] = useState(50);
     const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "", {
       stripeAccount: connectedAccountId,
     });
     
-    const createPaymentIntent = async (amount: number) => {
-        const response = await fetch("/api/create-payment-intent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount, connectedAccountId }),
-        });
-    
-        if (!response.ok) {
-          throw new Error(`Payment intent creation failed: ${response.statusText}`);
-        }
-    
-        const data = await response.json();
-        if (!data.clientSecret) {
-          throw new Error("No client secret received from server");
-        }
-    
-        return data.clientSecret;
-      };
+
     
   return (
       <div className="flex-col justify-center items-center w-full border-2 bg-red-100">
@@ -40,7 +23,7 @@ function Test({ connectedAccountId }: Props) {
           stripe={stripePromise}
           options={{
             mode: "payment",
-            amount: amount,
+            amount: amount * 100,
             currency: "usd",
           }}
       >

@@ -33,21 +33,17 @@ export default function CustomerForm({
   connectedAccountId,
   onBack,
 
-
-    amount,
-    stripePromiseMemo,
-   
+  amount,
+  stripePromiseMemo,
 }: {
-        connectedAccountId: string;
-        amount: string;
+  connectedAccountId: string;
+  amount: string;
   onBack: (step: any) => void;
- 
-     
-        stripePromiseMemo: any;
-        
-    }) {
-    const [clientSecret, setClientSecret] = useState<string | null>(null);
-    const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>();
+
+  stripePromiseMemo: any;
+}) {
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>();
   const form = useForm<z.infer<typeof customerSchema>>({
     resolver: zodResolver(customerSchema),
     defaultValues: {
@@ -71,36 +67,37 @@ export default function CustomerForm({
     });
     const rdata = await response.json();
     const customerId = rdata.customerId;
-      console.log("Customer ID: ", customerId);
-      const subscriptionResponse = await fetch(`/api/create-subscription`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          connectedAccountId,
-            customerId,
-          amount
-        }),
-      });
-      const subscriptionData = await subscriptionResponse.json();
-      setClientSecret(subscriptionData.latest_invoice.payment_intent.client_secret);
-
+    console.log("Customer ID: ", customerId);
+    const subscriptionResponse = await fetch(`/api/create-subscription`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        connectedAccountId,
+        customerId,
+        amount,
+      }),
+    });
+    const subscriptionData = await subscriptionResponse.json();
+    setClientSecret(
+      subscriptionData.latest_invoice.payment_intent.client_secret
+    );
   };
-useEffect(() => {
+  useEffect(() => {
     if (clientSecret) {
-        setStripeOptions({
-            clientSecret,
-            appearance: {
-              theme: "stripe",
-              variables: {
-                colorPrimary: "#00C220",
-                colorBackground: "#FFFFFF",
-              },
-            },
-          });
+      setStripeOptions({
+        clientSecret,
+        appearance: {
+          theme: "stripe",
+          variables: {
+            colorPrimary: "#00C220",
+            colorBackground: "#FFFFFF",
+          },
+        },
+      });
     }
-}, [clientSecret]);
+  }, [clientSecret]);
   return (
     <>
       {!stripeOptions ? (
@@ -108,8 +105,8 @@ useEffect(() => {
           <CardHeader>
             <CardTitle>Tell us about yourself</CardTitle>
             <CardDescription>
-              We need to gather some information so we can customize your donation
-              you can manage in later on.
+              We need to gather some information so we can customize your
+              donation you can manage in later on.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">

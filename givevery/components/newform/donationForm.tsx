@@ -38,10 +38,8 @@ const DEFAULT_STRIPE_APPEARANCE = {
 
 export default function DonationForm({ connectedAccountId }: DonationFormProps) {
   const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>();
-  const [stripeDefaultOptions, setStripeDefaultOptions] = useState<StripeElementsOptions>();
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [clientSecret, setClientSecret] = useState<string>();
-  const [clientSecretDefault, setClientSecretDefault] = useState<string>();
   const [donationAmount, setDonationAmount] = useState<number>(INITIAL_DONATION_AMOUNT);
   const [customAmount, setCustomAmount] = useState<number>();
   const [coverFees, setCoverFees] = useState(false);
@@ -93,9 +91,6 @@ export default function DonationForm({ connectedAccountId }: DonationFormProps) 
       if (totalAmount <= 0) {
         throw new Error("Amount must be greater than 0");
       }
-
-      const secret = await createPaymentIntent(totalAmount);
-      setClientSecret(secret);
       setStep(recurrence === "once" ? 2 : 1.5);
     } catch (error) {
       console.error("Error creating payment intent:", error);
@@ -111,36 +106,16 @@ export default function DonationForm({ connectedAccountId }: DonationFormProps) 
   };
 
   useEffect(() => {
-    const initializeStripe = async () => {
-      try {
-        const secret = await createPaymentIntent(INITIAL_DONATION_AMOUNT);
-        setClientSecretDefault(secret);
-      } catch (error) {
-        console.error("Error initializing Stripe:", error);
-        setError("Error initializing payment form");
-      }
-    };
-
-    initializeStripe();
-  }, [connectedAccountId]);
-
-  useEffect(() => {
-    if (clientSecretDefault) {
-      setStripeDefaultOptions({
-        clientSecret: clientSecretDefault,
-        appearance: DEFAULT_STRIPE_APPEARANCE,
-      });
-    }
-  }, [clientSecretDefault]);
-
-  useEffect(() => {
-    if (clientSecret) {
+    console.log(totalAmount)
+    if (totalAmount>0) {
       setStripeOptions({
-        clientSecret,
+        mode: "payment",
+        amount: totalAmount*100,
+        currency: "usd",
         appearance: DEFAULT_STRIPE_APPEARANCE,
       });
     }
-  }, [clientSecret]);
+  }, [totalAmount]);
 
   useEffect(() => {
     const baseAmount = Number(customAmount) || donationAmount || 0;
@@ -209,12 +184,12 @@ export default function DonationForm({ connectedAccountId }: DonationFormProps) 
                 Cover transaction fees (${TRANSACTION_FEE.toFixed(2)})
               </Label>
             </div>
-            {clientSecretDefault && stripeDefaultOptions && recurrence === "once" && (
-              <Elements stripe={stripePromiseMemo} options={stripeDefaultOptions}>
+            {recurrence === "once" && (
+              <Elements stripe={stripePromiseMemo} options={stripeOptions}>
                 <ExpressCheckoutElement 
                   options={{ 
-                    buttonType: { googlePay: "donate" },
-                    paymentMethodOrder: ["googlePay", "link"]
+                    buttonType: { googlePay: "donate", applePay: "donate" },
+                    paymentMethodOrder: ["googlePay"]
                   }} 
                   onConfirm={() => console.log("Confirmed")}
                 />
@@ -248,9 +223,9 @@ export default function DonationForm({ connectedAccountId }: DonationFormProps) 
           onBack={setStep}
         />
       )}
-      {step === 2 && clientSecret && stripeOptions && (
+      {step === 2 && stripeOptions && (
         <Elements stripe={stripePromiseMemo} options={stripeOptions}>
-          <CheckoutForm onBack={() => setStep(1)}/>
+          <CheckoutForm connectedAccountId={connectedAccountId} amount={totalAmount} onBack={() => setStep(1)}/>
         </Elements>
       )}
     </Card>
